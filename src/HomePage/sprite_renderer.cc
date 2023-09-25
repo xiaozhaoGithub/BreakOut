@@ -1,7 +1,7 @@
 #include "sprite_renderer.h"
 
 // clang-format off
-static float sprite_data[] = {
+static float sprite_vertices[] = {
 	// vertext   // texture pos	
 	0.0f, 1.0f, 0.0f, 1.0f,
 	1.0f, 1.0f, 1.0f, 1.0f,
@@ -64,7 +64,7 @@ void SpriteRenderer::InitRenderData()
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(sprite_data), sprite_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(sprite_vertices), sprite_vertices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
