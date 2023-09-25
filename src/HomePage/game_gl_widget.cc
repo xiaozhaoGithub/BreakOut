@@ -116,7 +116,7 @@ void GameGlWidget::UpdateParam()
     last_frame_time_ = current_frame_time_;
 
     sphere_->Move(delta_time, width(), height());
-    DoCollision(delta_time);
+    DoCollision();
 
     update();
 }
