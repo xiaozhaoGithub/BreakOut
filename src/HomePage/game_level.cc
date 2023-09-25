@@ -4,36 +4,7 @@
 #include <memory>
 #include <sstream>
 
-/**
- * @brief Check collision between AABB.
- */
-bool CheckCollision(GameObject* one, GameObject* two)
-{
-    bool is_x_axis_align = one->Pos().x() + one->Size().x() >= two->Pos().x()
-                           && two->Pos().x() + two->Size().x() >= one->Pos().x();
-
-    bool is_y_axis_align = one->Pos().y() + one->Size().y() >= two->Pos().y()
-                           && two->Pos().y() + two->Size().y() >= one->Pos().y();
-
-    return is_x_axis_align && is_y_axis_align;
-}
-
-/**
- * @brief Check collision between AABB and sphere.
- */
-#include <algorithm>
-bool CheckCollisionEx(SphereObject* one, GameObject* two)
-{
-    float radius = one->Radius();
-    QVector2D sphere_center = one->Pos() + QVector2D(radius, radius);
-    QVector2D box_center = two->Pos() + (two->Size() / 2);
-    QVector2D center_diff = sphere_center - box_center;
-
-    QVector2D clamp_diff = std::clamp(center_diff, -two->Size() / 2, two->Size() / 2);
-    QVector2D closest_point = box_center + clamp_diff; // important
-
-    return radius >= (sphere_center - closest_point).length();
-}
+#include "collision_helper.h"
 
 GameLevel::GameLevel(int w, int h)
     : w_(w)
@@ -69,13 +40,46 @@ void GameLevel::DoCollision(SphereObject* object)
         if (brick.IsDestroyed())
             continue;
 
-        if (CheckCollisionEx(object, &brick)) {
-            if (brick.IsSolid()) {
-                auto sphere = dynamic_cast<SphereObject*>(object);
-                auto v = sphere->Velocity();
+        auto result = CollisionHelper::CheckCollisionEx(object, &brick);
+        if (result.collision) {
+            auto sphere = dynamic_cast<SphereObject*>(object);
+            QVector2D v = sphere->Velocity();
+            QVector2D pos = sphere->Pos();
+
+            // collision repostioning
+            QVector2D diff = result.diff_closest_center;
+            QVector2D penetration = QVector2D(sphere->Radius(), sphere->Radius())
+                                    - QVector2D(std::abs(diff.x()), std::abs(diff.y()));
+
+            switch (result.direction) {
+            case CollisionHelper::UP: {
+                pos = QVector2D(pos.x(), pos.y() - penetration.y());
                 v.setY(-sphere->Velocity().y());
-                sphere->SetVelocity(v);
-            } else {
+                break;
+            }
+            case CollisionHelper::RIGHT: {
+                pos = QVector2D(pos.x() - penetration.x(), pos.y());
+                v.setX(-sphere->Velocity().x());
+                break;
+            }
+            case CollisionHelper::DOWN: {
+                pos = QVector2D(pos.x(), pos.y() + penetration.y());
+                v.setY(-sphere->Velocity().y());
+                break;
+            }
+            case CollisionHelper::LEFT: {
+                pos = QVector2D(QVector2D(pos.x() + penetration.x(), pos.y()));
+                v.setX(-sphere->Velocity().x());
+                break;
+            }
+            default:
+                break;
+            }
+
+            sphere->SetPos(pos);
+            sphere->SetVelocity(v);
+
+            if (!brick.IsSolid()) {
                 brick.Destroy();
             }
         }

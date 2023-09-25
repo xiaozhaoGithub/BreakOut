@@ -1,6 +1,6 @@
 #include "game_object.h"
 
-const QVector2D kInitVelocity(100.0f, -350.0f);
+constexpr QVector2D kInitSphereVelocity(100.0f, -350.0f);
 
 GameObject::GameObject()
     : GameObject(QVector2D(0.0f, 0.0f), QVector2D(1.0f, 1.0f), QVector3D(1.0f, 1.0f, 1.0f),
@@ -69,12 +69,18 @@ bool GameObject::IsSolid()
     return is_solid_;
 }
 
+void GameObject::Reset(const QVector2D& pos)
+{
+    SetPos(pos);
+}
+
 SphereObject::SphereObject(const QVector2D& pos, float radius, const QVector3D& color,
                            std::shared_ptr<QOpenGLTexture> texture)
     : GameObject(pos, QVector2D(2 * radius, 2 * radius), color, texture)
     , is_stuck_(true)
     , radius_(radius)
-    , velocity_(kInitVelocity)
+    , default_velocity_(kInitSphereVelocity)
+    , velocity_(kInitSphereVelocity)
 {}
 
 void SphereObject::SetRadius(float radius)
@@ -95,6 +101,11 @@ void SphereObject::SetVelocity(const QVector2D& velocity)
 QVector2D SphereObject::Velocity()
 {
     return velocity_;
+}
+
+QVector2D SphereObject::DefaultVelocity()
+{
+    return default_velocity_;
 }
 
 QVector2D SphereObject::Move(float dt, float window_w, float window_h)
@@ -119,9 +130,10 @@ QVector2D SphereObject::Move(float dt, float window_w, float window_h)
 
 void SphereObject::Reset(const QVector2D& pos)
 {
+    GameObject::SetPos(pos);
+
     is_stuck_ = true;
-    velocity_ = kInitVelocity;
-    SetPos(pos);
+    velocity_ = default_velocity_;
 }
 
 void SphereObject::SetStuck(bool state)

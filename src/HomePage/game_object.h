@@ -29,6 +29,8 @@ public:
     void SetSolid(bool state);
     bool IsSolid();
 
+    virtual void Reset(const QVector2D& pos);
+
 protected:
     QVector2D pos_;
     QVector2D size_;
@@ -54,13 +56,16 @@ public:
 
     void SetVelocity(const QVector2D& velocity);
     QVector2D Velocity();
+    QVector2D DefaultVelocity();
 
     QVector2D Move(float dt, float window_w, float window_h);
-    void Reset(const QVector2D& pos);
+
+    void Reset(const QVector2D& pos) override;
 
 private:
     bool is_stuck_;
     float radius_;
+    QVector2D default_velocity_;
     QVector2D velocity_;
 };
 #endif

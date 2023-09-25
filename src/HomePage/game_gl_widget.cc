@@ -2,9 +2,10 @@
 
 #include <QDateTime>
 #include <QOpenGLTexture>
-#include <mutex>
 
-constexpr float kVelocity = 25.0f;
+#include "collision_helper.h"
+
+constexpr float kVelocity = 35.0f;
 constexpr float kSphereRadius = 12.5f;
 constexpr QVector2D kPlayerSize(100.0f, 20.0f);
 
@@ -115,7 +116,7 @@ void GameGlWidget::UpdateParam()
     last_frame_time_ = current_frame_time_;
 
     sphere_->Move(delta_time, width(), height());
-    DoCollision();
+    DoCollision(delta_time);
 
     update();
 }
@@ -125,10 +126,22 @@ void GameGlWidget::DoCollision()
     game_level_->DoCollision(sphere_.get());
 
     if (!sphere_->isStuck()) {
-        // collision with player
-        if (CheckCollision(sphere_.get(), player_.get())) {
-            QVector2D velocity = sphere_->Velocity();
-            velocity.setY(-velocity.y());
+        // The sphere collides with the player.
+        if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
+            float player_center_x = player_->Pos().x() + player_->Size().x() / 2;
+
+            float distance = sphere_->Pos().x() + sphere_->Radius() - player_center_x;
+            float percentage = distance / (player_->Size().x() / 2);
+
+            float strength = 2.0f;
+            QVector2D old_velocity = sphere_->Velocity();
+
+            QVector2D velocity;
+            velocity.setX(sphere_->DefaultVelocity().x() * percentage * strength);
+            velocity.setY(-old_velocity.y());
+
+            // Keep the speed size, only change direction.
+            velocity = velocity.normalized() * old_velocity.length();
             sphere_->SetVelocity(velocity);
         }
 
@@ -151,11 +164,10 @@ void GameGlWidget::CheckGameState()
     // bottom border
     float sphere_bottom = sphere_->Pos().y() + 2 * sphere_->Radius();
     if (sphere_bottom >= height()) {
-        player_->SetPos(
+        player_->Reset(
             QVector2D(((float)width() - kPlayerSize.x()) / 2, (float)height() - kPlayerSize.y()));
 
-        QVector2D sphere_pos(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
-                             (float)height() - kPlayerSize.y() - 2 * sphere_->Radius());
-        sphere_->Reset(sphere_pos);
+        sphere_->Reset(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
+                                 (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
     }
 }

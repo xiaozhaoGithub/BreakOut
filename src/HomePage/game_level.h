@@ -3,8 +3,6 @@
 
 #include "game_object.h"
 
-bool CheckCollision(GameObject* one, GameObject* two);
-
 class GameLevel
 {
 public:

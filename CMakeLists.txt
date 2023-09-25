@@ -41,6 +41,7 @@ set(Headers
     src/HomePage/game_object.h
     src/HomePage/game_level.h
     src/HomePage/sprite_renderer.h
+    src/HomePage/collision_helper.h
 )
 #source_group("Headers" FILES ${Headers})
 
@@ -52,6 +53,7 @@ set(Sources
     src/HomePage/game_object.cc
     src/HomePage/game_level.cc
     src/HomePage/sprite_renderer.cc
+    src/HomePage/collision_helper.cc
 )
 #source_group("Sources" FILES ${Sources})
 set(ALL_FILES
