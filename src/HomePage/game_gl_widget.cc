@@ -4,6 +4,8 @@
 #include <QOpenGLTexture>
 
 #include "collision_helper.h"
+#include "particle_generator.h"
+#include "resource_manager.h"
 
 constexpr float kVelocity = 35.0f;
 constexpr float kSphereRadius = 12.5f;
@@ -39,6 +41,16 @@ void GameGlWidget::initializeGL()
     sphere_ = std::make_unique<SphereObject>(QVector2D(0.0f, 0.0f), kSphereRadius,
                                              QVector3D(1.0f, 1.0f, 1.0f), sphere_tex_);
 
+    auto particle_shader = std::make_shared<QOpenGLShaderProgram>();
+    particle_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/res/shaders/particle.vert");
+    particle_shader->addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                             ":/res/shaders/particle.frag");
+    particle_shader->link();
+
+    auto particle_tex =
+        Singleton<ResourceManager>::Instance()->Texture("particle", ":/res/images/particle.png", true);
+    particle_generator_ = std::make_shared<ParticleGenerator>(particle_shader, particle_tex, 500);
+
     render_timer_ = new QTimer(this);
     render_timer_->setInterval(10);
     render_timer_->start();
@@ -64,6 +76,7 @@ void GameGlWidget::paintGL()
 
     game_level_->Draw(sprite_renderer_);
     player_->Draw(sprite_renderer_);
+    particle_generator_->Draw();
     sphere_->Draw(sprite_renderer_);
 }
 

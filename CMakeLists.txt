@@ -42,6 +42,9 @@ set(Headers
     src/HomePage/game_level.h
     src/HomePage/sprite_renderer.h
     src/HomePage/collision_helper.h
+	src/HomePage/particle_generator.h
+	src/common/singleton.h
+	src/common/resource_manager.h
 )
 #source_group("Headers" FILES ${Headers})
 
@@ -54,6 +57,8 @@ set(Sources
     src/HomePage/game_level.cc
     src/HomePage/sprite_renderer.cc
     src/HomePage/collision_helper.cc
+	src/HomePage/particle_generator.cc
+	src/common/resource_manager.cc
 )
 #source_group("Sources" FILES ${Sources})
 set(ALL_FILES
@@ -73,6 +78,7 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} 
 PRIVATE
 	src/HomePage
+	src/common
 )
 
 ################################################################################

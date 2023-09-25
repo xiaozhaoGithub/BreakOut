@@ -9,6 +9,7 @@
 
 #include "game_level.h"
 #include "game_object.h"
+#include "particle_generator.h"
 #include "sprite_renderer.h"
 
 class GameGlWidget : public QOpenGLWidget, public QOpenGLFunctions_3_3_Core
@@ -46,5 +47,6 @@ private:
     std::shared_ptr<QOpenGLTexture> bg_tex_;
     std::shared_ptr<QOpenGLTexture> paddle_tex_;
     std::shared_ptr<QOpenGLTexture> sphere_tex_;
+    std::shared_ptr<ParticleGenerator> particle_generator_;
 };
 #endif
