@@ -6,9 +6,12 @@
         <file>res/levels/one.lvl</file>
         <file>res/shaders/sprite.frag</file>
         <file>res/shaders/sprite.vert</file>
+        <file>res/shaders/particle.frag</file>
+        <file>res/shaders/particle.vert</file>
         <file>res/images/block.png</file>
         <file>res/images/block_solid.png</file>
         <file>res/images/awesomeface.png</file>
         <file>res/images/paddle.png</file>
+        <file>res/images/particle.png</file>
     </qresource>
 </RCC>

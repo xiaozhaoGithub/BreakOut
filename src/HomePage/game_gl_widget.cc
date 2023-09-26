@@ -24,15 +24,18 @@ void GameGlWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
+    auto res_manager = Singleton<ResourceManager>::Instance();
+
+    // sprites
     auto shader_program = std::make_shared<QOpenGLShaderProgram>();
     shader_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/res/shaders/sprite.vert");
     shader_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/res/shaders/sprite.frag");
     shader_program->link();
 
     sprite_renderer_ = std::make_shared<SpriteRenderer>(shader_program);
-    bg_tex_ = std::make_shared<QOpenGLTexture>(QImage(":/res/images/wall.png"));
-    paddle_tex_ = std::make_shared<QOpenGLTexture>(QImage(":/res/images/paddle.png"));
-    sphere_tex_ = std::make_shared<QOpenGLTexture>(QImage(":/res/images/awesomeface.png"));
+    bg_tex_ = res_manager->Texture("wall", ":/res/images/wall.png", false);
+    paddle_tex_ = res_manager->Texture("paddle", ":/res/images/paddle.png", false);
+    sphere_tex_ = res_manager->Texture("awesomeface", ":/res/images/awesomeface.png", false);
     sphere_tex_->setWrapMode(QOpenGLTexture::ClampToEdge);
 
     player_ = std::make_unique<GameObject>(QVector2D(0.0f, 0.0f), kPlayerSize,
@@ -41,16 +44,17 @@ void GameGlWidget::initializeGL()
     sphere_ = std::make_unique<SphereObject>(QVector2D(0.0f, 0.0f), kSphereRadius,
                                              QVector3D(1.0f, 1.0f, 1.0f), sphere_tex_);
 
-    auto particle_shader = std::make_shared<QOpenGLShaderProgram>();
-    particle_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/res/shaders/particle.vert");
-    particle_shader->addShaderFromSourceFile(QOpenGLShader::Fragment,
-                                             ":/res/shaders/particle.frag");
-    particle_shader->link();
+    // particles
+    particle_shader_ = std::make_shared<QOpenGLShaderProgram>();
+    particle_shader_->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/res/shaders/particle.vert");
+    particle_shader_->addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                              ":/res/shaders/particle.frag");
+    particle_shader_->link();
 
-    auto particle_tex =
-        Singleton<ResourceManager>::Instance()->Texture("particle", ":/res/images/particle.png", true);
-    particle_generator_ = std::make_shared<ParticleGenerator>(particle_shader, particle_tex, 500);
+    auto particle_tex = res_manager->Texture("particle", ":/res/images/particle.png", true);
+    particle_generator_ = std::make_shared<ParticleGenerator>(particle_shader_, particle_tex);
 
+    // scheduled updates
     render_timer_ = new QTimer(this);
     render_timer_->setInterval(10);
     render_timer_->start();
@@ -67,6 +71,11 @@ void GameGlWidget::resizeGL(int w, int h)
     player_->SetPos(QVector2D(((float)w - kPlayerSize.x()) / 2, (float)h - kPlayerSize.y()));
     sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                               (float)h - kPlayerSize.y() - 2 * sphere_->Radius()));
+
+    QMatrix4x4 proj_mat;
+    proj_mat.ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
+    particle_shader_->bind();
+    particle_shader_->setUniformValue("proj_mat", proj_mat);
 }
 
 void GameGlWidget::paintGL()
@@ -130,6 +139,8 @@ void GameGlWidget::UpdateParam()
 
     sphere_->Move(delta_time, width(), height());
     DoCollision();
+
+    particle_generator_->Update(delta_time, 2, sphere_.get());
 
     update();
 }

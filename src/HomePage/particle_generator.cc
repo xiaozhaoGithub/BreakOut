@@ -19,6 +19,8 @@ ParticleGenerator::ParticleGenerator(std::shared_ptr<QOpenGLShaderProgram> shade
                                      std::shared_ptr<QOpenGLTexture> texture, int num)
     : shader_(shader)
     , texture_(texture)
+    , vao_(0)
+    , lastUnusedIndex_(0)
 {
     srand((unsigned int)time(NULL));
 
@@ -32,23 +34,30 @@ ParticleGenerator::ParticleGenerator(std::shared_ptr<QOpenGLShaderProgram> shade
 void ParticleGenerator::Update(float dt, int new_particle_num, GameObject* object)
 {
     for (int i = 0; i < new_particle_num; ++i) {
-        int unused_index = FirstUnusedParticleIndex();
-        RespawnParticles(unused_index, object);
+        lastUnusedIndex_ = FirstUnusedParticleIndex();
+        RespawnParticles(lastUnusedIndex_, object);
     }
 
-    for (auto& x : particles_) {
-        x.color.setW(x.color.w() - dt * 2.5f);
-        x.life -= dt;
+    for (auto& particle : particles_) {
+        particle.color.setW(particle.color.w() - dt * 2.5f);
+        particle.life -= dt;
     }
 }
 
 void ParticleGenerator::Draw()
 {
-    texture_->bind();
+    texture_->bind(0);
     shader_->bind();
+    for (auto& particle : particles_) {
+        if (particle.life <= 0.0f)
+            continue;
 
-    glBindVertexArray(vao_);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+        shader_->setUniformValue("pos", particle.pos);
+        shader_->setUniformValue("color", particle.color);
+
+        glBindVertexArray(vao_);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 }
 
 void ParticleGenerator::InitRenderData()
@@ -91,7 +100,9 @@ int ParticleGenerator::FirstUnusedParticleIndex()
 void ParticleGenerator::RespawnParticles(int index, GameObject* object)
 {
     particles_[index].pos = QVector2D(rand() % 10 - 5, rand() % 10 - 5);
-    particles_[index].color = QVector4D((rand() % 5) / 10.0f + 0.5, 0.0f, 0.0f, 1.0f);
+
+    float color_value = (rand() % 50) / 100.0f + 0.5f;
+    particles_[index].color = QVector4D(color_value, color_value, color_value, 1.0f);
     particles_[index].life = 1.0f;
 
     if (auto sphere = dynamic_cast<SphereObject*>(object)) {

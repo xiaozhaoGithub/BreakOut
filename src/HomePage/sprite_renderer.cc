@@ -32,7 +32,6 @@ void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector
     shader_program_->setUniformValue("sprite_color", color);
 
     QMatrix4x4 proj_mat;
-    proj_mat.setToIdentity();
     proj_mat.ortho(0.0f, 1366.0f, 768.0f, 0.0f, -1.0f, 1.0f);
     shader_program_->setUniformValue("proj_mat", proj_mat);
 

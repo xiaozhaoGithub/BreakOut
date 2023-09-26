@@ -19,7 +19,7 @@ class ParticleGenerator : protected QOpenGLFunctions_3_3_Core
 {
 public:
     ParticleGenerator(std::shared_ptr<QOpenGLShaderProgram> shader,
-                      std::shared_ptr<QOpenGLTexture> texture, int num);
+                      std::shared_ptr<QOpenGLTexture> texture, int num = 500);
 
     void Update(float dt, int new_particle_num, GameObject* object);
     void Draw();

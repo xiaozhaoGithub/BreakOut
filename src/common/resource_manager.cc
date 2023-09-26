@@ -7,10 +7,12 @@ std::shared_ptr<QOpenGLTexture> ResourceManager::Texture(const std::string& name
 {
     auto iter = texture_map_.find(name);
     if (iter == texture_map_.end()) {
-        texture_map_[name] = std::make_shared<QOpenGLTexture>(QImage(name.c_str()));
+        auto texture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
         if (alpha) {
-            texture_map_[name]->setFormat(QOpenGLTexture::RGBAFormat);
+            texture->setFormat(QOpenGLTexture::RGBAFormat);
         }
+        texture->setData(QImage(file.c_str()));
+        texture_map_[name] = texture;
     }
 
     return texture_map_[name];

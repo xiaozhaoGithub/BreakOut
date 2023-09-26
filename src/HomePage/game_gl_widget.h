@@ -47,6 +47,8 @@ private:
     std::shared_ptr<QOpenGLTexture> bg_tex_;
     std::shared_ptr<QOpenGLTexture> paddle_tex_;
     std::shared_ptr<QOpenGLTexture> sphere_tex_;
+
+    std::shared_ptr<QOpenGLShaderProgram> particle_shader_;
     std::shared_ptr<ParticleGenerator> particle_generator_;
 };
 #endif
