@@ -125,9 +125,6 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
 
 void GameGlWidget::UpdateParam()
 {
-    if (sphere_->isStuck())
-        return;
-
     current_frame_time_ = QDateTime::currentDateTime().toMSecsSinceEpoch();
     if (last_frame_time_ == 0) {
         last_frame_time_ = current_frame_time_;
@@ -136,9 +133,10 @@ void GameGlWidget::UpdateParam()
 
     float delta_time = (float)(current_frame_time_ - last_frame_time_) / 1000.0f;
     last_frame_time_ = current_frame_time_;
-
-    sphere_->Move(delta_time, width(), height());
-    DoCollision();
+    if (!sphere_->isStuck()) {
+        sphere_->Move(delta_time, width(), height());
+        DoCollision();
+    }
 
     particle_generator_->Update(delta_time, 2, sphere_.get());
 
