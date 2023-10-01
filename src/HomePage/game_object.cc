@@ -110,6 +110,9 @@ QVector2D SphereObject::DefaultVelocity()
 
 QVector2D SphereObject::Move(float dt, float window_w, float window_h)
 {
+    if (isStuck())
+        return pos_;
+
     pos_ += velocity_ * dt;
 
     float x = qBound(0.0f, pos_.x(), window_w - 2 * radius_);

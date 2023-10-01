@@ -28,7 +28,7 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    void UpdateParam();
+    void UpdateGame();
     void DoCollision();
     void HandlePlayerMove(const QVector2D& pos);
     void CheckGameState();

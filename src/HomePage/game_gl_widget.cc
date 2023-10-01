@@ -58,7 +58,7 @@ void GameGlWidget::initializeGL()
     render_timer_ = new QTimer(this);
     render_timer_->setInterval(10);
     render_timer_->start();
-    connect(render_timer_, &QTimer::timeout, this, &GameGlWidget::UpdateParam);
+    connect(render_timer_, &QTimer::timeout, this, &GameGlWidget::UpdateGame);
 }
 
 void GameGlWidget::resizeGL(int w, int h)
@@ -123,7 +123,7 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
     update();
 }
 
-void GameGlWidget::UpdateParam()
+void GameGlWidget::UpdateGame()
 {
     current_frame_time_ = QDateTime::currentDateTime().toMSecsSinceEpoch();
     if (last_frame_time_ == 0) {
@@ -131,44 +131,45 @@ void GameGlWidget::UpdateParam()
         return;
     }
 
-    float delta_time = (float)(current_frame_time_ - last_frame_time_) / 1000.0f;
+    float dt = (float)(current_frame_time_ - last_frame_time_) / 1000.0f;
     last_frame_time_ = current_frame_time_;
-    if (!sphere_->isStuck()) {
-        sphere_->Move(delta_time, width(), height());
-        DoCollision();
-    }
 
-    particle_generator_->Update(delta_time, 2, sphere_.get());
+    sphere_->Move(dt, width(), height());
+    DoCollision();
+
+    float offset = sphere_->Radius() / 2.0f;
+    particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
 
     update();
 }
 
 void GameGlWidget::DoCollision()
 {
+    if (sphere_->isStuck())
+        return;
+
     game_level_->DoCollision(sphere_.get());
 
-    if (!sphere_->isStuck()) {
-        // The sphere collides with the player.
-        if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
-            float player_center_x = player_->Pos().x() + player_->Size().x() / 2;
+    // The sphere collides with the player.
+    if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
+        float player_center_x = player_->Pos().x() + player_->Size().x() / 2;
 
-            float distance = sphere_->Pos().x() + sphere_->Radius() - player_center_x;
-            float percentage = distance / (player_->Size().x() / 2);
+        float distance = sphere_->Pos().x() + sphere_->Radius() - player_center_x;
+        float percentage = distance / (player_->Size().x() / 2);
 
-            float strength = 2.0f;
-            QVector2D old_velocity = sphere_->Velocity();
+        float strength = 2.0f;
+        QVector2D old_velocity = sphere_->Velocity();
 
-            QVector2D velocity;
-            velocity.setX(sphere_->DefaultVelocity().x() * percentage * strength);
-            velocity.setY(-old_velocity.y());
+        QVector2D velocity;
+        velocity.setX(sphere_->DefaultVelocity().x() * percentage * strength);
+        velocity.setY(-old_velocity.y());
 
-            // Keep the speed size, only change direction.
-            velocity = velocity.normalized() * old_velocity.length();
-            sphere_->SetVelocity(velocity);
-        }
-
-        CheckGameState();
+        // Keep the speed size, only change direction.
+        velocity = velocity.normalized() * old_velocity.length();
+        sphere_->SetVelocity(velocity);
     }
+
+    CheckGameState();
 }
 
 void GameGlWidget::HandlePlayerMove(const QVector2D& pos)
