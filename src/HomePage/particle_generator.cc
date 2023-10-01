@@ -31,22 +31,30 @@ ParticleGenerator::ParticleGenerator(std::shared_ptr<QOpenGLShaderProgram> shade
     InitRenderData();
 }
 
-void ParticleGenerator::Update(float dt, int new_particle_num, GameObject* object)
+void ParticleGenerator::Update(float dt, int new_particle_num, GameObject* object,
+                               const QVector2D& offset)
 {
     for (int i = 0; i < new_particle_num; ++i) {
         lastUnusedIndex_ = FirstUnusedParticleIndex();
-        RespawnParticles(lastUnusedIndex_, object);
+        RespawnParticles(lastUnusedIndex_, object, offset);
     }
 
     for (auto& particle : particles_) {
-        particle.color.setW(particle.color.w() - dt * 2.5f);
         particle.life -= dt;
+
+        if (particle.life >= 0.0f) {
+            particle.pos -= dt * particle.velocity;
+            particle.color.setW(std::max(0.0f, particle.color.w() - dt * 2.5f));
+        }
     }
 }
 
 void ParticleGenerator::Draw()
 {
-    texture_->bind(0);
+    glEnable(GL_BLEND);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE); // color = src * src_a + dest * 1
+
     shader_->bind();
     for (auto& particle : particles_) {
         if (particle.life <= 0.0f)
@@ -55,9 +63,13 @@ void ParticleGenerator::Draw()
         shader_->setUniformValue("pos", particle.pos);
         shader_->setUniformValue("color", particle.color);
 
+        texture_->bind(0);
+
         glBindVertexArray(vao_);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // blend default
 }
 
 void ParticleGenerator::InitRenderData()
@@ -97,15 +109,15 @@ int ParticleGenerator::FirstUnusedParticleIndex()
     return 0;
 }
 
-void ParticleGenerator::RespawnParticles(int index, GameObject* object)
+void ParticleGenerator::RespawnParticles(int index, GameObject* object, const QVector2D& offset)
 {
-    particles_[index].pos = QVector2D(rand() % 10 - 5, rand() % 10 - 5);
-
     float color_value = (rand() % 50) / 100.0f + 0.5f;
     particles_[index].color = QVector4D(color_value, color_value, color_value, 1.0f);
     particles_[index].life = 1.0f;
 
     if (auto sphere = dynamic_cast<SphereObject*>(object)) {
+        float rand_value = (rand() % 100 - 50) / 10.0f;
+        particles_[index].pos = object->Pos() + QVector2D(rand_value, rand_value) + offset;
         particles_[index].velocity = sphere->Velocity() * 0.1f;
     }
 }

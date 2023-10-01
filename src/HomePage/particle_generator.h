@@ -21,13 +21,13 @@ public:
     ParticleGenerator(std::shared_ptr<QOpenGLShaderProgram> shader,
                       std::shared_ptr<QOpenGLTexture> texture, int num = 500);
 
-    void Update(float dt, int new_particle_num, GameObject* object);
+    void Update(float dt, int new_particle_num, GameObject* object, const QVector2D& offset);
     void Draw();
 
 private:
     void InitRenderData();
     int FirstUnusedParticleIndex();
-    void RespawnParticles(int index, GameObject* object);
+    void RespawnParticles(int index, GameObject* object, const QVector2D& offset);
 
 private:
     std::vector<Particel> particles_;
