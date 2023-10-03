@@ -15,6 +15,8 @@ public:
     SpriteRenderer(std::shared_ptr<QOpenGLShaderProgram>& shader_program);
     ~SpriteRenderer();
 
+    void SetSize(const QVector2D& size);
+
     void Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector3D& pos,
               const QVector3D& size = QVector3D(10.0f, 10.0f, 10.0f), float rotate = 0.0f,
               const QVector3D& color = QVector3D(1.0f, 1.0f, 1.0f));
@@ -23,6 +25,7 @@ private:
     void InitRenderData();
 
 private:
+    QVector2D size_;
     quint32 vao_;
     std::shared_ptr<QOpenGLShaderProgram> shader_program_;
 };

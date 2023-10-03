@@ -65,6 +65,8 @@ void GameGlWidget::resizeGL(int w, int h)
 {
     QOpenGLWidget::resizeGL(w, h);
 
+    sprite_renderer_->SetSize(QVector2D(w, h));
+
     game_level_->SetViewport(w, h);
     game_level_->Load();
 

@@ -24,6 +24,11 @@ SpriteRenderer::~SpriteRenderer()
     shader_program_->release();
 }
 
+void SpriteRenderer::SetSize(const QVector2D& size)
+{
+    size_ = size;
+}
+
 void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector3D& pos,
                           const QVector3D& size, float rotate, const QVector3D& color)
 {
@@ -32,7 +37,7 @@ void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector
     shader_program_->setUniformValue("sprite_color", color);
 
     QMatrix4x4 proj_mat;
-    proj_mat.ortho(0.0f, 1366.0f, 768.0f, 0.0f, -1.0f, 1.0f);
+    proj_mat.ortho(0.0f, size_.x(), size_.y(), 0.0f, -1.0f, 1.0f);
     shader_program_->setUniformValue("proj_mat", proj_mat);
 
     QMatrix4x4 model_mat;
