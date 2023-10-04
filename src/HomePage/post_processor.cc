@@ -47,7 +47,7 @@ PostProcessor::PostProcessor(std::shared_ptr<QOpenGLShaderProgram> shader,
     InitRenderData();
 
     shader_->bind();
-    shader_->setUniformValue("offsets", offsets);
+    shader_->setUniformValueArray("offsets", (float*)offsets, 9, 2);
     shader_->setUniformValueArray("blur_kernels", blur_kernels, 9, 1);
 }
 
