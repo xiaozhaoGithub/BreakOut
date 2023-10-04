@@ -5,6 +5,7 @@
 
 #include "collision_helper.h"
 #include "particle_generator.h"
+#include "post_processor.h"
 #include "resource_manager.h"
 
 constexpr float kVelocity = 35.0f;
@@ -18,7 +19,10 @@ GameGlWidget::GameGlWidget(QWidget* parent)
     setFocusPolicy(Qt::StrongFocus);
 }
 
-GameGlWidget::~GameGlWidget() {}
+GameGlWidget::~GameGlWidget()
+{
+    Singleton<ResourceManager>::ReleaseInstance();
+}
 
 void GameGlWidget::initializeGL()
 {
@@ -54,6 +58,18 @@ void GameGlWidget::initializeGL()
     auto particle_tex = res_manager->Texture("particle", ":/res/images/particle.png", true);
     particle_generator_ = std::make_shared<ParticleGenerator>(particle_shader_, particle_tex);
 
+    // post-process
+    auto post_shader = std::make_shared<QOpenGLShaderProgram>();
+    post_shader->addShaderFromSourceFile(QOpenGLShader::Vertex,
+                                         ":/res/shaders/post_processor.vert");
+    post_shader->addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                         ":/res/shaders/post_processor.frag");
+    post_shader->link();
+
+    auto post_fbo = std::make_shared<QOpenGLFramebufferObject>(width(), height());
+    post_processor_ = std::make_shared<PostProcessor>(post_shader, post_fbo);
+    game_level_->SetPostProcessor(post_processor_);
+
     // scheduled updates
     render_timer_ = new QTimer(this);
     render_timer_->setInterval(10);
@@ -78,17 +94,24 @@ void GameGlWidget::resizeGL(int w, int h)
     proj_mat.ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
     particle_shader_->bind();
     particle_shader_->setUniformValue("proj_mat", proj_mat);
+
+    post_processor_->SetFbo(std::make_shared<QOpenGLFramebufferObject>(w, h));
 }
 
 void GameGlWidget::paintGL()
 {
-    sprite_renderer_->Draw(bg_tex_, QVector3D(0.0f, 0.0f, 0.0f), QVector3D(width(), height(), 0.0f),
-                           0.0f, QVector3D(0.0f, 0.0f, 0.0f));
+    post_processor_->BeginProcessor();
+
+    sprite_renderer_->Draw(bg_tex_, QVector2D(0.0f, 0.0f), QVector2D(width(), height()), 0.0f,
+                           QVector3D(0.0f, 0.0f, 0.0f));
 
     game_level_->Draw(sprite_renderer_);
     player_->Draw(sprite_renderer_);
     particle_generator_->Draw();
     sphere_->Draw(sprite_renderer_);
+
+    post_processor_->EndProcessor();
+    post_processor_->Draw();
 }
 
 void GameGlWidget::keyPressEvent(QKeyEvent* event)
@@ -141,6 +164,8 @@ void GameGlWidget::UpdateGame()
 
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
+
+    post_processor_->Update(dt);
 
     update();
 }

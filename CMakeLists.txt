@@ -43,6 +43,7 @@ set(Headers
     src/HomePage/sprite_renderer.h
     src/HomePage/collision_helper.h
 	src/HomePage/particle_generator.h
+	src/HomePage/post_processor.h
 	src/common/singleton.h
 	src/common/resource_manager.h
 )
@@ -58,6 +59,7 @@ set(Sources
     src/HomePage/sprite_renderer.cc
     src/HomePage/collision_helper.cc
 	src/HomePage/particle_generator.cc
+	src/HomePage/post_processor.cc
 	src/common/resource_manager.cc
 )
 #source_group("Sources" FILES ${Sources})

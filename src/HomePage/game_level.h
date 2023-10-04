@@ -2,6 +2,7 @@
 #define GAME_LEVEL_H_
 
 #include "game_object.h"
+#include "post_processor.h"
 
 class GameLevel
 {
@@ -13,6 +14,8 @@ public:
     void Load();
     void Draw(std::shared_ptr<SpriteRenderer> renderer);
     void DoCollision(SphereObject* sphere);
+
+    void SetPostProcessor(std::shared_ptr<PostProcessor> post_processor);
 
 private:
     enum TileValue
@@ -33,5 +36,7 @@ private:
     int w_;
     int h_;
     std::list<GameObject> bricks_;
+
+    std::shared_ptr<PostProcessor> post_processor_;
 };
 #endif

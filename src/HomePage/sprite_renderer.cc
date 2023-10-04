@@ -22,6 +22,7 @@ SpriteRenderer::SpriteRenderer(std::shared_ptr<QOpenGLShaderProgram>& shader_pro
 SpriteRenderer::~SpriteRenderer()
 {
     shader_program_->release();
+    glDeleteVertexArrays(1, &vao_);
 }
 
 void SpriteRenderer::SetSize(const QVector2D& size)
@@ -29,8 +30,19 @@ void SpriteRenderer::SetSize(const QVector2D& size)
     size_ = size;
 }
 
-void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector3D& pos,
-                          const QVector3D& size, float rotate, const QVector3D& color)
+void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector2D& pos,
+                          const QVector2D& size, float rotate, const QVector3D& color)
+{
+    GLuint tex_id = 0;
+    if (texture && texture->isCreated()) {
+        tex_id = texture->textureId();
+    }
+
+    Draw(tex_id, pos, size, rotate, color);
+}
+
+void SpriteRenderer::Draw(GLuint texture, const QVector2D& pos, const QVector2D& size, float rotate,
+                          const QVector3D& color)
 {
     shader_program_->bind();
     shader_program_->setUniformValue("image", 0);
@@ -46,9 +58,8 @@ void SpriteRenderer::Draw(std::shared_ptr<QOpenGLTexture> texture, const QVector
     model_mat.scale(size);
     shader_program_->setUniformValue("model_mat", model_mat);
 
-    if (texture && texture->isCreated()) {
-        texture->bind(0);
-    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -50,5 +50,7 @@ private:
 
     std::shared_ptr<QOpenGLShaderProgram> particle_shader_;
     std::shared_ptr<ParticleGenerator> particle_generator_;
+
+    std::shared_ptr<PostProcessor> post_processor_;
 };
 #endif

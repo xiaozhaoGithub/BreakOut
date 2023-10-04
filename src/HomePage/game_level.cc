@@ -79,11 +79,18 @@ void GameLevel::DoCollision(SphereObject* object)
             sphere->SetPos(pos);
             sphere->SetVelocity(v);
 
-            if (!brick.IsSolid()) {
+            if (brick.IsSolid()) {
+                post_processor_->SetShake(true);
+            } else {
                 brick.Destroy();
             }
         }
     }
+}
+
+void GameLevel::SetPostProcessor(std::shared_ptr<PostProcessor> post_processor)
+{
+    post_processor_ = post_processor;
 }
 
 std::vector<std::vector<int>> GameLevel::ReadLayersFromFile(const char* file)
