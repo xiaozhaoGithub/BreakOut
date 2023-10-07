@@ -63,10 +63,6 @@ set(Sources
 	src/common/resource_manager.cc
 )
 #source_group("Sources" FILES ${Sources})
-set(ALL_FILES
-	${Headers}
-	${Sources}
-)
 
 add_executable(${PROJECT_NAME} 
 	${Headers}
