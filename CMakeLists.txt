@@ -44,6 +44,8 @@ set(Headers
     src/HomePage/collision_helper.h
 	src/HomePage/particle_generator.h
 	src/HomePage/post_processor.h
+	src/HomePage/power_up.h
+	src/HomePage/power_up_manager.h
 	src/common/singleton.h
 	src/common/resource_manager.h
 )
@@ -60,6 +62,8 @@ set(Sources
     src/HomePage/collision_helper.cc
 	src/HomePage/particle_generator.cc
 	src/HomePage/post_processor.cc
+	src/HomePage/power_up.cc
+	src/HomePage/power_up_manager.cc
 	src/common/resource_manager.cc
 )
 #source_group("Sources" FILES ${Sources})

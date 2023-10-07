@@ -9,6 +9,7 @@
 GameLevel::GameLevel(int w, int h)
     : w_(w)
     , h_(h)
+    , powerup_manager_(std::make_shared<PowerUpManager>())
 {}
 
 GameLevel::~GameLevel() {}
@@ -83,6 +84,8 @@ void GameLevel::DoCollision(SphereObject* object)
                 post_processor_->SetShake(true);
             } else {
                 brick.Destroy();
+
+                powerup_manager_->SpawnPowerUp(pos);
             }
         }
     }

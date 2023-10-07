@@ -1,5 +1,6 @@
 #include "post_processor.h"
 
+#include <QDateTime>
 #include <QOpenGLVertexArrayObject>
 
 // clang-format off
@@ -32,6 +33,12 @@ static constexpr GLfloat blur_kernels[9] {
 	2.0 / 16, 4.0 / 16, 2.0 / 16, 
 	1.0 / 16, 2.0 / 16, 1.0 / 16
 };
+
+static constexpr GLfloat  edge_kernels[9] {
+	1, 1, 1,
+	1, -8, 1,
+	1, 1, 1
+};
 // clang-format on
 
 
@@ -49,6 +56,7 @@ PostProcessor::PostProcessor(std::shared_ptr<QOpenGLShaderProgram> shader,
     shader_->bind();
     shader_->setUniformValueArray("offsets", (float*)offsets, 9, 2);
     shader_->setUniformValueArray("blur_kernels", blur_kernels, 9, 1);
+    shader_->setUniformValueArray("edge_kernels", edge_kernels, 9, 1);
 }
 
 PostProcessor::~PostProcessor()
@@ -73,7 +81,9 @@ void PostProcessor::EndProcessor()
 void PostProcessor::Update(float dt)
 {
     shader_->bind();
-    shader_->setUniformValue("time", dt);
+    shader_->setUniformValue("time",
+                             static_cast<int>(QDateTime::currentDateTime().toMSecsSinceEpoch()));
+    shader_->setUniformValue("is_chaos", true);
 
     if (duration_ > 0.0f) {
         duration_ = std::max(duration_ - dt, 0.0f);
@@ -101,6 +111,9 @@ void PostProcessor::Draw()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo_->texture());
+    // repeat wrap mode
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLES, 0, 6);

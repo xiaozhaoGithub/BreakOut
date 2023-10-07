@@ -3,6 +3,7 @@
 
 #include "game_object.h"
 #include "post_processor.h"
+#include "power_up_manager.h"
 
 class GameLevel
 {
@@ -38,5 +39,6 @@ private:
     std::list<GameObject> bricks_;
 
     std::shared_ptr<PostProcessor> post_processor_;
+    std::shared_ptr<PowerUpManager> powerup_manager_;
 };
 #endif
