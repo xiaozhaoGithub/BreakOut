@@ -17,6 +17,8 @@ public:
 
 private:
     bool NeedSpawnPowerUp(int probability);
+    inline void TrySpawnPowerup(const QVector2D& pos, int probability, PowerUp::Type type,
+                                const QVector3D& color, const QString& filename);
 
 private:
     int probability_of_good_;

@@ -84,7 +84,7 @@ void GameLevel::DoCollision(SphereObject* object, std::function<void(const QVect
                 post_processor_->SetShake(true);
             } else {
                 brick.Destroy();
-                cb(pos);
+                cb(brick.Pos());
             }
         }
     }
