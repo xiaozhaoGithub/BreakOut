@@ -10,6 +10,10 @@ public:
     ~PowerUpManager() {}
 
     void SpawnPowerUp(const QVector2D& pos);
+    void Update(float dt);
+    void Draw(std::shared_ptr<SpriteRenderer> renderer);
+
+    void DoCollision(GameObject* object);
 
 private:
     bool NeedSpawnPowerUp(int probability);

@@ -9,7 +9,6 @@
 GameLevel::GameLevel(int w, int h)
     : w_(w)
     , h_(h)
-    , powerup_manager_(std::make_shared<PowerUpManager>())
 {}
 
 GameLevel::~GameLevel() {}
@@ -28,6 +27,7 @@ void GameLevel::Load()
 
 void GameLevel::Draw(std::shared_ptr<SpriteRenderer> renderer)
 {
+    // bricks
     for (auto& brick : bricks_) {
         if (!brick.IsDestroyed()) {
             brick.Draw(renderer);
@@ -35,7 +35,7 @@ void GameLevel::Draw(std::shared_ptr<SpriteRenderer> renderer)
     }
 }
 
-void GameLevel::DoCollision(SphereObject* object)
+void GameLevel::DoCollision(SphereObject* object, std::function<void(const QVector2D& pos)> cb)
 {
     for (auto& brick : bricks_) {
         if (brick.IsDestroyed())
@@ -84,8 +84,7 @@ void GameLevel::DoCollision(SphereObject* object)
                 post_processor_->SetShake(true);
             } else {
                 brick.Destroy();
-
-                powerup_manager_->SpawnPowerUp(pos);
+                cb(pos);
             }
         }
     }

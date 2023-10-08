@@ -15,6 +15,7 @@ constexpr QVector2D kPlayerSize(100.0f, 20.0f);
 GameGlWidget::GameGlWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , game_level_(std::make_unique<GameLevel>(width(), height()))
+    , powerup_manager_(std::make_shared<PowerUpManager>())
 {
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -109,6 +110,7 @@ void GameGlWidget::paintGL()
     player_->Draw(sprite_renderer_);
     particle_generator_->Draw();
     sphere_->Draw(sprite_renderer_);
+    powerup_manager_->Draw(sprite_renderer_);
 
     post_processor_->EndProcessor();
     post_processor_->Draw();
@@ -165,6 +167,8 @@ void GameGlWidget::UpdateGame()
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
 
+    powerup_manager_->Update(dt);
+
     post_processor_->Update(dt);
 
     update();
@@ -175,7 +179,9 @@ void GameGlWidget::DoCollision()
     if (sphere_->isStuck())
         return;
 
-    game_level_->DoCollision(sphere_.get());
+    // The sphere collides with the bricks.
+    game_level_->DoCollision(sphere_.get(), std::bind(&PowerUpManager::SpawnPowerUp,
+                                                      powerup_manager_, std::placeholders::_1));
 
     // The sphere collides with the player.
     if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
@@ -195,6 +201,9 @@ void GameGlWidget::DoCollision()
         velocity = velocity.normalized() * old_velocity.length();
         sphere_->SetVelocity(velocity);
     }
+
+    // The player collides with the powerups.
+    powerup_manager_->DoCollision(player_.get());
 
     CheckGameState();
 }

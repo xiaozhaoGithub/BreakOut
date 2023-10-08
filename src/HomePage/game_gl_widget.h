@@ -52,5 +52,6 @@ private:
     std::shared_ptr<ParticleGenerator> particle_generator_;
 
     std::shared_ptr<PostProcessor> post_processor_;
+    std::shared_ptr<PowerUpManager> powerup_manager_;
 };
 #endif

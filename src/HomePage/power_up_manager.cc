@@ -1,5 +1,9 @@
 #include "power_up_manager.h"
 
+#include "collision_helper.h"
+
+constexpr float kVelocity = 60.0f;
+
 PowerUpManager::PowerUpManager()
     : probability_of_good_(75)
     , probability_of_bad_(15)
@@ -45,6 +49,31 @@ void PowerUpManager::SpawnPowerUp(const QVector2D& pos)
     powerups_.emplace_back(
         std::make_shared<PowerUp>(type, pos, QVector2D(100.0f, 20.0f), color,
                                   std::make_shared<QOpenGLTexture>(QImage(filename))));
+}
+
+void PowerUpManager::Update(float dt)
+{
+    for (auto& powerup : powerups_) {
+        QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
+        powerup->SetPos(pos);
+    }
+}
+
+void PowerUpManager::Draw(std::shared_ptr<SpriteRenderer> renderer)
+{
+    for (auto& powerup : powerups_) {
+        powerup->Draw(renderer);
+    }
+}
+
+void PowerUpManager::DoCollision(GameObject* object)
+{
+    for (auto& powerup : powerups_) {
+        if (!CollisionHelper::CheckCollision(object, powerup.get()))
+            continue;
+
+        powerup->Active();
+    }
 }
 
 bool PowerUpManager::NeedSpawnPowerUp(int probability)

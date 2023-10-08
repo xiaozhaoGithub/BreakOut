@@ -14,7 +14,7 @@ public:
     void SetViewport(int w, int h);
     void Load();
     void Draw(std::shared_ptr<SpriteRenderer> renderer);
-    void DoCollision(SphereObject* sphere);
+    void DoCollision(SphereObject* object, std::function<void(const QVector2D& pos)> cb);
 
     void SetPostProcessor(std::shared_ptr<PostProcessor> post_processor);
 
@@ -39,6 +39,5 @@ private:
     std::list<GameObject> bricks_;
 
     std::shared_ptr<PostProcessor> post_processor_;
-    std::shared_ptr<PowerUpManager> powerup_manager_;
 };
 #endif
