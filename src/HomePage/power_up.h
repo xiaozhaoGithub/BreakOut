@@ -23,10 +23,16 @@ public:
             std::shared_ptr<QOpenGLTexture> texture);
     ~PowerUp() {}
 
+    inline Type PowerUpType();
     void Active();
 
 private:
     Type type_;
     bool is_activated_;
 };
+
+inline PowerUp::Type PowerUp::PowerUpType()
+{
+    return type_;
+}
 #endif

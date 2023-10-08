@@ -126,10 +126,20 @@ void PostProcessor::SetFbo(std::shared_ptr<QOpenGLFramebufferObject> fbo)
     fbo_ = fbo;
 }
 
-void PostProcessor::SetShake(bool is_shake)
+void PostProcessor::SetShake(bool state)
 {
-    is_shake_ = is_shake;
+    is_shake_ = state;
     duration_ = is_shake_ ? 0.05f : 0.0f;
+}
+
+void PostProcessor::SetConfuse(bool state)
+{
+    is_confuse_ = state;
+}
+
+void PostProcessor::SetChaos(bool state)
+{
+    is_chaos_ = state;
 }
 
 void PostProcessor::InitRenderData()

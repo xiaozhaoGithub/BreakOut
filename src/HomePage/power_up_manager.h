@@ -15,6 +15,8 @@ public:
 
     void DoCollision(GameObject* object);
 
+    const std::vector<std::shared_ptr<PowerUp>>& PowerUps();
+
 private:
     bool NeedSpawnPowerUp(int probability);
     inline void TrySpawnPowerup(const QVector2D& pos, int probability, PowerUp::Type type,

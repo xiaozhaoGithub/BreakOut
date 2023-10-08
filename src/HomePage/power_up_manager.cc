@@ -57,6 +57,11 @@ void PowerUpManager::DoCollision(GameObject* object)
     }
 }
 
+const std::vector<std::shared_ptr<PowerUp>>& PowerUpManager::PowerUps()
+{
+    return powerups_;
+}
+
 bool PowerUpManager::NeedSpawnPowerUp(int probability)
 {
     return rand() % probability == 0;

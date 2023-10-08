@@ -20,7 +20,9 @@ public:
     void Draw();
 
     void SetFbo(std::shared_ptr<QOpenGLFramebufferObject> fbo);
-    void SetShake(bool is_shake);
+    void SetShake(bool state);
+    void SetConfuse(bool state);
+    void SetChaos(bool state);
 
 private:
     void InitRenderData();
@@ -29,6 +31,8 @@ private:
     quint32 vao_;
     QSize size_;
     bool is_shake_;
+    bool is_confuse_;
+    bool is_chaos_;
     std::shared_ptr<QOpenGLShaderProgram> shader_;
     std::shared_ptr<QOpenGLFramebufferObject> fbo_;
 

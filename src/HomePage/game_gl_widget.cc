@@ -163,6 +163,7 @@ void GameGlWidget::UpdateGame()
 
     sphere_->Move(dt, width(), height());
     DoCollision();
+    ActivePowerUps();
 
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
@@ -176,36 +177,67 @@ void GameGlWidget::UpdateGame()
 
 void GameGlWidget::DoCollision()
 {
-    if (sphere_->isStuck())
-        return;
+    if (!sphere_->isStuck()) {
+        // The sphere collides with the bricks.
+        game_level_->DoCollision(sphere_.get(), std::bind(&PowerUpManager::SpawnPowerUp,
+                                                          powerup_manager_, std::placeholders::_1));
 
-    // The sphere collides with the bricks.
-    game_level_->DoCollision(sphere_.get(), std::bind(&PowerUpManager::SpawnPowerUp,
-                                                      powerup_manager_, std::placeholders::_1));
+        // The sphere collides with the player.
+        if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
+            float player_center_x = player_->Pos().x() + player_->Size().x() / 2;
 
-    // The sphere collides with the player.
-    if (CollisionHelper::CheckCollision(sphere_.get(), player_.get())) {
-        float player_center_x = player_->Pos().x() + player_->Size().x() / 2;
+            float distance = sphere_->Pos().x() + sphere_->Radius() - player_center_x;
+            float percentage = distance / (player_->Size().x() / 2);
 
-        float distance = sphere_->Pos().x() + sphere_->Radius() - player_center_x;
-        float percentage = distance / (player_->Size().x() / 2);
+            float strength = 2.0f;
+            QVector2D old_velocity = sphere_->Velocity();
 
-        float strength = 2.0f;
-        QVector2D old_velocity = sphere_->Velocity();
+            QVector2D velocity;
+            velocity.setX(sphere_->DefaultVelocity().x() * percentage * strength);
+            velocity.setY(-old_velocity.y());
 
-        QVector2D velocity;
-        velocity.setX(sphere_->DefaultVelocity().x() * percentage * strength);
-        velocity.setY(-old_velocity.y());
-
-        // Keep the speed size, only change direction.
-        velocity = velocity.normalized() * old_velocity.length();
-        sphere_->SetVelocity(velocity);
+            // Keep the speed size, only change direction.
+            velocity = velocity.normalized() * old_velocity.length();
+            sphere_->SetVelocity(velocity);
+        }
     }
 
     // The player collides with the powerups.
     powerup_manager_->DoCollision(player_.get());
 
     CheckGameState();
+}
+
+void GameGlWidget::ActivePowerUps()
+{
+    auto powerups = powerup_manager_->PowerUps();
+    for (auto powerup : powerups) {
+        PowerUp::Type type = powerup->PowerUpType();
+        switch (type) {
+        case PowerUp::T_SPEED:
+            sphere_->SetVelocity(sphere_->Velocity() * 2.0f);
+            break;
+        case PowerUp::T_STICKY:
+            sphere_->SetPos(
+                QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
+                          (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
+            sphere_->SetStuck(true);
+            break;
+        case PowerUp::T_PASS_THROUGH:
+            break;
+        case PowerUp::T_PAD_SIZE_INCREASE:
+            player_->SetSize(QVector2D(player_->Size().x() + 50, player_->Size().y()));
+            break;
+        case PowerUp::T_CONFUSE:
+            post_processor_->SetConfuse(true);
+            break;
+        case PowerUp::T_CHAOS:
+            post_processor_->SetChaos(true);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void GameGlWidget::HandlePlayerMove(const QVector2D& pos)

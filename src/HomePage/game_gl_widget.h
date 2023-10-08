@@ -30,6 +30,7 @@ protected:
 private:
     void UpdateGame();
     void DoCollision();
+    void ActivePowerUps();
     void HandlePlayerMove(const QVector2D& pos);
     void CheckGameState();
 
