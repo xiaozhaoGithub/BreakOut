@@ -13,42 +13,23 @@ PowerUpManager::PowerUpManager()
 
 void PowerUpManager::SpawnPowerUp(const QVector2D& pos)
 {
-    PowerUp::Type type;
-    QVector3D color;
-    QString filename;
+    TrySpawnPowerup(pos, probability_of_good_, PowerUp::T_SPEED, QVector3D(0.5f, 0.5f, 1.0f),
+                    ":/res/images/powerup_speed.png");
 
-    if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_SPEED;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_speed.png";
-    } else if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_STICKY;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_sticky.png";
-    } else if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_PASS_THROUGH;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_passthrough.png";
-    } else if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_PAD_SIZE_INCREASE;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_increase.png";
-    } else if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_CONFUSE;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_confuse.png";
-    } else if (NeedSpawnPowerUp(probability_of_good_)) {
-        type = PowerUp::T_CHAOS;
-        color = QVector3D(1.0f, 0.0f, 0.0f);
-        filename = ":/res/images/powerup_chaos.png";
-    }
+    TrySpawnPowerup(pos, probability_of_good_, PowerUp::T_STICKY, QVector3D(1.0f, 0.5f, 1.0f),
+                    ":/res/images/powerup_sticky.png");
 
-    if (filename.isEmpty())
-        return;
+    TrySpawnPowerup(pos, probability_of_good_, PowerUp::T_PASS_THROUGH, QVector3D(0.5f, 1.0f, 0.5f),
+                    ":/res/images/powerup_passthrough.png");
 
-    powerups_.emplace_back(
-        std::make_shared<PowerUp>(type, pos, QVector2D(100.0f, 20.0f), color,
-                                  std::make_shared<QOpenGLTexture>(QImage(filename))));
+    TrySpawnPowerup(pos, probability_of_good_, PowerUp::T_PAD_SIZE_INCREASE,
+                    QVector3D(1.0f, 0.6f, 0.4f), ":/res/images/powerup_increase.png");
+
+    TrySpawnPowerup(pos, probability_of_bad_, PowerUp::T_CONFUSE, QVector3D(1.0f, 0.3f, 0.3f),
+                    ":/res/images/powerup_confuse.png");
+
+    TrySpawnPowerup(pos, probability_of_bad_, PowerUp::T_CHAOS, QVector3D(0.9f, 0.25f, 0.25f),
+                    ":/res/images/powerup_chaos.png");
 }
 
 void PowerUpManager::Update(float dt)
@@ -79,4 +60,15 @@ void PowerUpManager::DoCollision(GameObject* object)
 bool PowerUpManager::NeedSpawnPowerUp(int probability)
 {
     return rand() % probability == 0;
+}
+
+void PowerUpManager::TrySpawnPowerup(const QVector2D& pos, int probability, PowerUp::Type type,
+                                     const QVector3D& color, const QString& filename)
+{
+    if (!NeedSpawnPowerUp(probability))
+        return;
+
+    powerups_.emplace_back(
+        std::make_shared<PowerUp>(type, pos, QVector2D(100.0f, 20.0f), color,
+                                  std::make_shared<QOpenGLTexture>(QImage(filename))));
 }
