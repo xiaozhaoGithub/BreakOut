@@ -83,7 +83,6 @@ void PostProcessor::Update(float dt)
     shader_->bind();
     shader_->setUniformValue("time",
                              static_cast<int>(QDateTime::currentDateTime().toMSecsSinceEpoch()));
-    shader_->setUniformValue("is_chaos", true);
 
     if (duration_ > 0.0f) {
         duration_ = std::max(duration_ - dt, 0.0f);
