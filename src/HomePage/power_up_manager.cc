@@ -39,12 +39,16 @@ void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
             QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
             powerup->SetPos(pos);
 
+            if (!powerup->IsActive())
+                continue;
+
             int ms = powerup->DurationMs();
             if (ms > 0) {
                 ms -= dt * 1000;
                 if (ms <= 0) {
                     ms = 0;
 
+                    // powerup_pair.second.erase();
                     PowerUp::Type type = powerup->PowerUpType();
                     if (!IsExistSamePowerUpActived(type)) {
                         cb(type);
@@ -73,9 +77,13 @@ void PowerUpManager::DoCollision(GameObject* object, std::function<void(PowerUp:
 {
     for (auto& powerup_pair : powerups_) {
         for (auto& powerup : powerup_pair.second) {
+            if (powerup->IsActive())
+                continue;
+
             if (!CollisionHelper::CheckCollision(object, powerup.get()))
                 continue;
 
+            powerup->SetActive(true);
             cb(powerup->PowerUpType());
         }
     }

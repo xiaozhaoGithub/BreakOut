@@ -31,12 +31,13 @@ private:
     void UpdateGame();
     void DoCollision();
     void HandlePlayerMove(const QVector2D& pos);
-
-    void CheckGameState();
+    void CheckSpherePos();
 
     // callback
     void OnActivatePowerUp(PowerUp::Type type);
     void OnDeactivatePowerUp(PowerUp::Type type);
+
+    QVector2D PlayerCenter();
 
 private:
     QTimer* render_timer_;

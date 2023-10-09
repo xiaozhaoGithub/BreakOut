@@ -200,6 +200,7 @@ void GameGlWidget::DoCollision()
             // Keep the speed size, only change direction.
             velocity = velocity.normalized() * old_velocity.length();
             sphere_->SetVelocity(velocity);
+            sphere_->SetStuck(sphere_->IsSticky());
         }
     }
 
@@ -207,7 +208,7 @@ void GameGlWidget::DoCollision()
     powerup_manager_->DoCollision(player_.get(), std::bind(&GameGlWidget::OnActivatePowerUp, this,
                                                            std::placeholders::_1));
 
-    CheckGameState();
+    CheckSpherePos();
 }
 
 void GameGlWidget::HandlePlayerMove(const QVector2D& pos)
@@ -220,13 +221,14 @@ void GameGlWidget::HandlePlayerMove(const QVector2D& pos)
     }
 }
 
-void GameGlWidget::CheckGameState()
+void GameGlWidget::CheckSpherePos()
 {
     // bottom border
     float sphere_bottom = sphere_->Pos().y() + 2 * sphere_->Radius();
     if (sphere_bottom >= height()) {
         player_->Reset(
             QVector2D(((float)width() - kPlayerSize.x()) / 2, (float)height() - kPlayerSize.y()));
+        player_->SetSize(kPlayerSize);
 
         sphere_->Reset(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                  (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
@@ -240,11 +242,9 @@ void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
         sphere_->SetVelocity(sphere_->Velocity() * 1.2f);
         break;
     case PowerUp::T_STICKY:
-        sphere_->SetPos(
-            QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
-                      (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
+        sphere_->SetPos(PlayerCenter());
         sphere_->SetSticky(true);
-        sphere_->SetStuck(true);
+        player_->SetColor(QVector3D(1.0f, 0.5f, 1.0f));
         break;
     case PowerUp::T_PASS_THROUGH:
         sphere_->SetPassThrough(true);
@@ -267,7 +267,8 @@ void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
 {
     switch (type) {
     case PowerUp::T_STICKY:
-        // sphere_->SetSticky(false);
+        sphere_->SetSticky(false);
+        player_->SetColor(QVector3D(1.0f, 1.0f, 1.0f));
         break;
     case PowerUp::T_PASS_THROUGH:
         sphere_->SetPassThrough(false);
@@ -281,4 +282,10 @@ void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
     default:
         break;
     }
+}
+
+QVector2D GameGlWidget::PlayerCenter()
+{
+    return QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
+                     (float)height() - player_->Size().y() - 2 * sphere_->Radius());
 }
