@@ -58,6 +58,9 @@ public:
     QVector2D Velocity();
     QVector2D DefaultVelocity();
 
+    void SetSticky(bool state);
+    bool IsSticky();
+
     void SetPassThrough(bool state);
     bool IsPassThrough();
 

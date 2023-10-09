@@ -125,6 +125,7 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
     switch (key) {
     case Qt::Key_Space: {
         sphere_->SetStuck(false);
+        sphere_->SetSticky(false);
         break;
     }
     case Qt::Key_Left: {
@@ -242,6 +243,7 @@ void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
         sphere_->SetPos(
             QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
                       (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
+        sphere_->SetSticky(true);
         sphere_->SetStuck(true);
         break;
     case PowerUp::T_PASS_THROUGH:
@@ -265,19 +267,16 @@ void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
 {
     switch (type) {
     case PowerUp::T_STICKY:
-        sphere_->SetPos(
-            QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
-                      (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
-        sphere_->SetStuck(true);
+        // sphere_->SetSticky(false);
         break;
     case PowerUp::T_PASS_THROUGH:
-        sphere_->SetPassThrough(true);
+        sphere_->SetPassThrough(false);
         break;
     case PowerUp::T_CONFUSE:
-        post_processor_->SetConfuse(true);
+        post_processor_->SetConfuse(false);
         break;
     case PowerUp::T_CHAOS:
-        post_processor_->SetChaos(true);
+        post_processor_->SetChaos(false);
         break;
     default:
         break;

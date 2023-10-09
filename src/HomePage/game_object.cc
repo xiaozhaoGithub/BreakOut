@@ -78,6 +78,8 @@ SphereObject::SphereObject(const QVector2D& pos, float radius, const QVector3D& 
                            std::shared_ptr<QOpenGLTexture> texture)
     : GameObject(pos, QVector2D(2 * radius, 2 * radius), color, texture)
     , is_stuck_(true)
+    , is_sticky_(false)
+    , is_pass_through_(false)
     , radius_(radius)
     , default_velocity_(kInitSphereVelocity)
     , velocity_(kInitSphereVelocity)
@@ -106,6 +108,16 @@ QVector2D SphereObject::Velocity()
 QVector2D SphereObject::DefaultVelocity()
 {
     return default_velocity_;
+}
+
+void SphereObject::SetSticky(bool state)
+{
+    is_sticky_ = state;
+}
+
+bool SphereObject::IsSticky()
+{
+    return is_sticky_;
 }
 
 void SphereObject::SetPassThrough(bool state)
