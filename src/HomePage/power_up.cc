@@ -5,9 +5,10 @@ PowerUp::PowerUp(Type type, const QVector2D& pos, const QVector2D& size, const Q
     : GameObject(pos, size, color, texture)
     , type_(type)
     , is_activated_(false)
+    , duration_ms_(5000)
 {}
 
-void PowerUp::Active()
+void PowerUp::SetActive(bool state)
 {
-    is_activated_ = true;
+    is_activated_ = state;
 }

@@ -77,8 +77,10 @@ void GameLevel::DoCollision(SphereObject* object, std::function<void(const QVect
                 break;
             }
 
-            sphere->SetPos(pos);
-            sphere->SetVelocity(v);
+            if (brick.IsSolid() || !sphere->IsPassThrough()) {
+                sphere->SetPos(pos);
+                sphere->SetVelocity(v);
+            }
 
             if (brick.IsSolid()) {
                 post_processor_->SetShake(true);

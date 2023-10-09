@@ -32,34 +32,53 @@ void PowerUpManager::SpawnPowerUp(const QVector2D& pos)
                     ":/res/images/powerup_chaos.png");
 }
 
-void PowerUpManager::Update(float dt)
+void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
 {
-    for (auto& powerup : powerups_) {
-        QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
-        powerup->SetPos(pos);
+    for (auto& powerup_pair : powerups_) {
+        for (auto& powerup : powerup_pair.second) {
+            QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
+            powerup->SetPos(pos);
+
+            int ms = powerup->DurationMs();
+            if (ms > 0) {
+                ms -= dt * 1000;
+                if (ms <= 0) {
+                    ms = 0;
+
+                    PowerUp::Type type = powerup->PowerUpType();
+                    if (!IsExistSamePowerUpActived(type)) {
+                        cb(type);
+                    }
+                }
+
+                powerup->SetDuration(ms);
+            }
+        }
     }
 }
 
 void PowerUpManager::Draw(std::shared_ptr<SpriteRenderer> renderer)
 {
-    for (auto& powerup : powerups_) {
-        powerup->Draw(renderer);
+    for (auto& powerup_pair : powerups_) {
+        for (auto& powerup : powerup_pair.second) {
+            if (powerup->IsActive())
+                continue;
+
+            powerup->Draw(renderer);
+        }
     }
 }
 
-void PowerUpManager::DoCollision(GameObject* object)
+void PowerUpManager::DoCollision(GameObject* object, std::function<void(PowerUp::Type)> cb)
 {
-    for (auto& powerup : powerups_) {
-        if (!CollisionHelper::CheckCollision(object, powerup.get()))
-            continue;
+    for (auto& powerup_pair : powerups_) {
+        for (auto& powerup : powerup_pair.second) {
+            if (!CollisionHelper::CheckCollision(object, powerup.get()))
+                continue;
 
-        powerup->Active();
+            cb(powerup->PowerUpType());
+        }
     }
-}
-
-const std::vector<std::shared_ptr<PowerUp>>& PowerUpManager::PowerUps()
-{
-    return powerups_;
 }
 
 bool PowerUpManager::NeedSpawnPowerUp(int probability)
@@ -73,7 +92,22 @@ void PowerUpManager::TrySpawnPowerup(const QVector2D& pos, int probability, Powe
     if (!NeedSpawnPowerUp(probability))
         return;
 
-    powerups_.emplace_back(
+    powerups_[type].emplace_back(
         std::make_shared<PowerUp>(type, pos, QVector2D(100.0f, 20.0f), color,
                                   std::make_shared<QOpenGLTexture>(QImage(filename))));
+}
+
+inline bool PowerUpManager::IsExistSamePowerUpActived(PowerUp::Type type)
+{
+    auto iter = powerups_.find(type);
+    if (iter == powerups_.end())
+        return false;
+
+    for (auto& powerup : iter->second) {
+        if (powerup->IsActive()) {
+            return true;
+        }
+    }
+
+    return false;
 }

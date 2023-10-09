@@ -163,12 +163,12 @@ void GameGlWidget::UpdateGame()
 
     sphere_->Move(dt, width(), height());
     DoCollision();
-    ActivePowerUps();
 
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
 
-    powerup_manager_->Update(dt);
+    powerup_manager_->Update(dt, std::bind(&GameGlWidget::OnDeactivatePowerUp, this,
+                                           std::placeholders::_1));
 
     post_processor_->Update(dt);
 
@@ -177,7 +177,7 @@ void GameGlWidget::UpdateGame()
 
 void GameGlWidget::DoCollision()
 {
-    if (!sphere_->isStuck()) {
+    if (!sphere_->IsStuck()) {
         // The sphere collides with the bricks.
         game_level_->DoCollision(sphere_.get(), std::bind(&PowerUpManager::SpawnPowerUp,
                                                           powerup_manager_, std::placeholders::_1));
@@ -203,48 +203,17 @@ void GameGlWidget::DoCollision()
     }
 
     // The player collides with the powerups.
-    powerup_manager_->DoCollision(player_.get());
+    powerup_manager_->DoCollision(player_.get(), std::bind(&GameGlWidget::OnActivatePowerUp, this,
+                                                           std::placeholders::_1));
 
     CheckGameState();
-}
-
-void GameGlWidget::ActivePowerUps()
-{
-    auto powerups = powerup_manager_->PowerUps();
-    for (auto powerup : powerups) {
-        PowerUp::Type type = powerup->PowerUpType();
-        switch (type) {
-        case PowerUp::T_SPEED:
-            sphere_->SetVelocity(sphere_->Velocity() * 2.0f);
-            break;
-        case PowerUp::T_STICKY:
-            sphere_->SetPos(
-                QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
-                          (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
-            sphere_->SetStuck(true);
-            break;
-        case PowerUp::T_PASS_THROUGH:
-            break;
-        case PowerUp::T_PAD_SIZE_INCREASE:
-            player_->SetSize(QVector2D(player_->Size().x() + 50, player_->Size().y()));
-            break;
-        case PowerUp::T_CONFUSE:
-            post_processor_->SetConfuse(true);
-            break;
-        case PowerUp::T_CHAOS:
-            post_processor_->SetChaos(true);
-            break;
-        default:
-            break;
-        }
-    }
 }
 
 void GameGlWidget::HandlePlayerMove(const QVector2D& pos)
 {
     player_->SetPos(pos);
 
-    if (sphere_->isStuck()) {
+    if (sphere_->IsStuck()) {
         sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                   (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
     }
@@ -260,5 +229,57 @@ void GameGlWidget::CheckGameState()
 
         sphere_->Reset(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                  (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
+    }
+}
+
+void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
+{
+    switch (type) {
+    case PowerUp::T_SPEED:
+        sphere_->SetVelocity(sphere_->Velocity() * 1.2f);
+        break;
+    case PowerUp::T_STICKY:
+        sphere_->SetPos(
+            QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
+                      (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
+        sphere_->SetStuck(true);
+        break;
+    case PowerUp::T_PASS_THROUGH:
+        sphere_->SetPassThrough(true);
+        break;
+    case PowerUp::T_PAD_SIZE_INCREASE:
+        player_->SetSize(QVector2D(player_->Size().x() + 50, player_->Size().y()));
+        break;
+    case PowerUp::T_CONFUSE:
+        post_processor_->SetConfuse(true);
+        break;
+    case PowerUp::T_CHAOS:
+        post_processor_->SetChaos(true);
+        break;
+    default:
+        break;
+    }
+}
+
+void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
+{
+    switch (type) {
+    case PowerUp::T_STICKY:
+        sphere_->SetPos(
+            QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
+                      (float)height() - player_->Size().y() - 2 * sphere_->Radius()));
+        sphere_->SetStuck(true);
+        break;
+    case PowerUp::T_PASS_THROUGH:
+        sphere_->SetPassThrough(true);
+        break;
+    case PowerUp::T_CONFUSE:
+        post_processor_->SetConfuse(true);
+        break;
+    case PowerUp::T_CHAOS:
+        post_processor_->SetChaos(true);
+        break;
+    default:
+        break;
     }
 }

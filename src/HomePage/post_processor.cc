@@ -49,6 +49,8 @@ PostProcessor::PostProcessor(std::shared_ptr<QOpenGLShaderProgram> shader,
     , shader_(shader)
     , fbo_(fbo)
     , is_shake_(false)
+    , is_confuse_(false)
+    , is_chaos_(false)
     , duration_(0)
 {
     InitRenderData();
@@ -98,6 +100,8 @@ void PostProcessor::Draw()
     shader_->bind();
     shader_->setUniformValue("image", 0);
     shader_->setUniformValue("is_shake", is_shake_);
+    shader_->setUniformValue("is_confuse", is_confuse_);
+    shader_->setUniformValue("is_chaos", is_chaos_);
 
     QMatrix4x4 proj_mat;
     proj_mat.ortho(0.0f, fbo_->size().width(), fbo_->size().height(), 0.0f, -1.0f, 1.0f);

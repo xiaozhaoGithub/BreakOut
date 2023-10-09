@@ -49,7 +49,7 @@ public:
     ~SphereObject() {}
 
     void SetStuck(bool state);
-    bool isStuck();
+    bool IsStuck();
 
     void SetRadius(float radius);
     float Radius();
@@ -58,12 +58,16 @@ public:
     QVector2D Velocity();
     QVector2D DefaultVelocity();
 
+    void SetPassThrough(bool state);
+    bool IsPassThrough();
+
     QVector2D Move(float dt, float window_w, float window_h);
 
     void Reset(const QVector2D& pos) override;
 
 private:
     bool is_stuck_;
+    bool is_pass_through_;
     float radius_;
     QVector2D default_velocity_;
     QVector2D velocity_;

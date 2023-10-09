@@ -108,9 +108,19 @@ QVector2D SphereObject::DefaultVelocity()
     return default_velocity_;
 }
 
+void SphereObject::SetPassThrough(bool state)
+{
+    is_pass_through_ = state;
+}
+
+bool SphereObject::IsPassThrough()
+{
+    return is_pass_through_;
+}
+
 QVector2D SphereObject::Move(float dt, float window_w, float window_h)
 {
-    if (isStuck())
+    if (IsStuck())
         return pos_;
 
     pos_ += velocity_ * dt;
@@ -144,7 +154,7 @@ void SphereObject::SetStuck(bool state)
     is_stuck_ = state;
 }
 
-bool SphereObject::isStuck()
+bool SphereObject::IsStuck()
 {
     return is_stuck_;
 }
