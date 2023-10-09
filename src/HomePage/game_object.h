@@ -70,6 +70,7 @@ public:
 
 private:
     bool is_stuck_;
+    bool is_sticky_;
     bool is_pass_through_;
     float radius_;
     QVector2D default_velocity_;
