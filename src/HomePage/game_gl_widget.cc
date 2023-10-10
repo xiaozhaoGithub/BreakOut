@@ -242,7 +242,6 @@ void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
         sphere_->SetVelocity(sphere_->Velocity() * 1.2f);
         break;
     case PowerUp::T_STICKY:
-        sphere_->SetPos(PlayerCenter());
         sphere_->SetSticky(true);
         player_->SetColor(QVector3D(1.0f, 0.5f, 1.0f));
         break;
@@ -282,10 +281,4 @@ void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
     default:
         break;
     }
-}
-
-QVector2D GameGlWidget::PlayerCenter()
-{
-    return QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
-                     (float)height() - player_->Size().y() - 2 * sphere_->Radius());
 }
