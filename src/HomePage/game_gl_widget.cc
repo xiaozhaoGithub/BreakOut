@@ -168,8 +168,8 @@ void GameGlWidget::UpdateGame()
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
 
-    powerup_manager_->Update(dt, std::bind(&GameGlWidget::OnDeactivatePowerUp, this,
-                                           std::placeholders::_1));
+    powerup_manager_->Update(dt, width(), height(),
+                             std::bind(&GameGlWidget::OnDeactivatePowerUp, this, std::placeholders::_1));
 
     post_processor_->Update(dt);
 
@@ -242,7 +242,6 @@ void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
         sphere_->SetVelocity(sphere_->Velocity() * 1.2f);
         break;
     case PowerUp::T_STICKY:
-        sphere_->SetPos(PlayerCenter());
         sphere_->SetSticky(true);
         player_->SetColor(QVector3D(1.0f, 0.5f, 1.0f));
         break;
@@ -282,10 +281,4 @@ void GameGlWidget::OnDeactivatePowerUp(PowerUp::Type type)
     default:
         break;
     }
-}
-
-QVector2D GameGlWidget::PlayerCenter()
-{
-    return QVector2D(player_->Pos().x() + (player_->Size().x() - 2 * sphere_->Radius()) / 2.0f,
-                     (float)height() - player_->Size().y() - 2 * sphere_->Radius());
 }
