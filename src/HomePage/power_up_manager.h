@@ -12,7 +12,7 @@ public:
     ~PowerUpManager() {}
 
     void SpawnPowerUp(const QVector2D& pos);
-    void Update(float dt, std::function<void(PowerUp::Type)> cb);
+    void Update(float dt, int w, int h, std::function<void(PowerUp::Type)> cb);
     void Draw(std::shared_ptr<SpriteRenderer> renderer);
 
     void DoCollision(GameObject* object, std::function<void(PowerUp::Type)> cb);
@@ -28,6 +28,6 @@ private:
     int probability_of_good_;
     int probability_of_bad_;
 
-    std::unordered_map<PowerUp::Type, std::vector<std::shared_ptr<PowerUp>>> powerups_;
+    std::unordered_map<PowerUp::Type, std::vector<std::shared_ptr<PowerUp>>> powerup_map_;
 };
 #endif

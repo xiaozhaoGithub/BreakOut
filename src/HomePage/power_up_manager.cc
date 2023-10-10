@@ -32,31 +32,35 @@ void PowerUpManager::SpawnPowerUp(const QVector2D& pos)
                     ":/res/images/powerup_chaos.png");
 }
 
-void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
+void PowerUpManager::Update(float dt, int w, int h, std::function<void(PowerUp::Type)> cb)
 {
-    for (auto& powerup_pair : powerups_) {
-        for (auto iter = powerup_pair.second.begin(); iter != powerup_pair.second.end(); ++iter) {
-            auto& powerup = (*iter);
+    for (auto& powerup_pair : powerup_map_) {
+        for (auto iter = powerup_pair.second.begin(); iter != powerup_pair.second.end();) {
+            QVector2D pos = QVector2D((*iter)->Pos().x(), (*iter)->Pos().y() + kVelocity * dt);
+            (*iter)->SetPos(pos);
 
-            QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
-            powerup->SetPos(pos);
-
-            if (!powerup->IsActive())
-                continue;
-
-            int ms = powerup->DurationMs();
-            if (ms > 0) {
-                ms -= dt * 1000;
-                if (ms <= 0) {
-                    PowerUp::Type type = powerup->PowerUpType();
-                    if (!IsExistSamePowerUpActived(type)) {
-                        cb(type);
-                    }
-
-                    powerup_pair.second.erase(iter);
+            if (!(*iter)->IsActive()) {
+                if (pos.y() + (*iter)->Size().y() >= h) {
+                    iter = powerup_pair.second.erase(iter);
                 } else {
-                    powerup->SetDuration(ms);
+                    ++iter;
                 }
+
+                continue;
+            }
+
+            int ms = (*iter)->DurationMs();
+            ms -= dt * 1000;
+            if (ms <= 0) {
+                PowerUp::Type type = (*iter)->PowerUpType();
+
+                iter = powerup_pair.second.erase(iter);
+                if (!IsExistSamePowerUpActived(type)) {
+                    cb(type);
+                }
+            } else {
+                (*iter)->SetDuration(ms);
+                ++iter;
             }
         }
     }
@@ -64,7 +68,7 @@ void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
 
 void PowerUpManager::Draw(std::shared_ptr<SpriteRenderer> renderer)
 {
-    for (auto& powerup_pair : powerups_) {
+    for (auto& powerup_pair : powerup_map_) {
         for (auto& powerup : powerup_pair.second) {
             if (powerup->IsActive())
                 continue;
@@ -76,7 +80,7 @@ void PowerUpManager::Draw(std::shared_ptr<SpriteRenderer> renderer)
 
 void PowerUpManager::DoCollision(GameObject* object, std::function<void(PowerUp::Type)> cb)
 {
-    for (auto& powerup_pair : powerups_) {
+    for (auto& powerup_pair : powerup_map_) {
         for (auto& powerup : powerup_pair.second) {
             if (powerup->IsActive())
                 continue;
@@ -101,15 +105,15 @@ void PowerUpManager::TrySpawnPowerup(const QVector2D& pos, int probability, Powe
     if (!NeedSpawnPowerUp(probability))
         return;
 
-    powerups_[type].emplace_back(
+    powerup_map_[type].emplace_back(
         std::make_shared<PowerUp>(type, pos, QVector2D(100.0f, 20.0f), color,
                                   std::make_shared<QOpenGLTexture>(QImage(filename))));
 }
 
 inline bool PowerUpManager::IsExistSamePowerUpActived(PowerUp::Type type)
 {
-    auto iter = powerups_.find(type);
-    if (iter == powerups_.end())
+    auto iter = powerup_map_.find(type);
+    if (iter == powerup_map_.end())
         return false;
 
     for (auto& powerup : iter->second) {

@@ -37,8 +37,6 @@ private:
     void OnActivatePowerUp(PowerUp::Type type);
     void OnDeactivatePowerUp(PowerUp::Type type);
 
-    QVector2D PlayerCenter();
-
 private:
     QTimer* render_timer_;
     qint64 last_frame_time_ = 0;
