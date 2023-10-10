@@ -27,6 +27,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS 
 	Widgets 
+	multimedia 
 	REQUIRED
 )
 QT5_ADD_RESOURCES(RCC_FILES BreakOut.qrc)
@@ -48,6 +49,7 @@ set(Headers
 	src/HomePage/power_up_manager.h
 	src/common/singleton.h
 	src/common/resource_manager.h
+	src/common/audio_manager.h
 )
 #source_group("Headers" FILES ${Headers})
 
@@ -65,6 +67,7 @@ set(Sources
 	src/HomePage/power_up.cc
 	src/HomePage/power_up_manager.cc
 	src/common/resource_manager.cc
+	src/common/audio_manager.cc
 )
 #source_group("Sources" FILES ${Sources})
 
@@ -89,6 +92,7 @@ PRIVATE
 target_link_libraries(${PROJECT_NAME} 
 PRIVATE 
 	Qt${QT_VERSION_MAJOR}::Widgets
+	Qt${QT_VERSION_MAJOR}::Multimedia
 )
 
 set_target_properties(${PROJECT_NAME}
