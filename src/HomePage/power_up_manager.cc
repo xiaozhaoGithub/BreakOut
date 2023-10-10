@@ -35,7 +35,9 @@ void PowerUpManager::SpawnPowerUp(const QVector2D& pos)
 void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
 {
     for (auto& powerup_pair : powerups_) {
-        for (auto& powerup : powerup_pair.second) {
+        for (auto iter = powerup_pair.second.begin(); iter != powerup_pair.second.end(); ++iter) {
+            auto& powerup = (*iter);
+
             QVector2D pos = QVector2D(powerup->Pos().x(), powerup->Pos().y() + kVelocity * dt);
             powerup->SetPos(pos);
 
@@ -46,16 +48,15 @@ void PowerUpManager::Update(float dt, std::function<void(PowerUp::Type)> cb)
             if (ms > 0) {
                 ms -= dt * 1000;
                 if (ms <= 0) {
-                    ms = 0;
-
-                    // powerup_pair.second.erase();
                     PowerUp::Type type = powerup->PowerUpType();
                     if (!IsExistSamePowerUpActived(type)) {
                         cb(type);
                     }
-                }
 
-                powerup->SetDuration(ms);
+                    powerup_pair.second.erase(iter);
+                } else {
+                    powerup->SetDuration(ms);
+                }
             }
         }
     }
