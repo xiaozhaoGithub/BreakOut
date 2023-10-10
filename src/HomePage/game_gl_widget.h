@@ -28,6 +28,7 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
 
 private:
+    void InitAudioManager();
     void UpdateGame();
     void DoCollision();
     void HandlePlayerMove(const QVector2D& pos);

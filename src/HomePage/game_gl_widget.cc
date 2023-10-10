@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QOpenGLTexture>
 
+#include "audio_manager.h"
 #include "collision_helper.h"
 #include "particle_generator.h"
 #include "post_processor.h"
@@ -18,11 +19,14 @@ GameGlWidget::GameGlWidget(QWidget* parent)
     , powerup_manager_(std::make_shared<PowerUpManager>())
 {
     setFocusPolicy(Qt::StrongFocus);
+
+    InitAudioManager();
 }
 
 GameGlWidget::~GameGlWidget()
 {
     Singleton<ResourceManager>::ReleaseInstance();
+    Singleton<AudioManager>::Instance()->Stop();
 }
 
 void GameGlWidget::initializeGL()
@@ -149,6 +153,11 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
     }
 
     update();
+}
+
+void GameGlWidget::InitAudioManager()
+{
+    Singleton<AudioManager>::Instance()->Play(":/res/audio/breakout.mp3");
 }
 
 void GameGlWidget::UpdateGame()

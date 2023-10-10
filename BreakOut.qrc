@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-		<file>res/levels/one.lvl</file>
+        <file>res/levels/one.lvl</file>
         <file>res/shaders/shader.vert</file>
         <file>res/shaders/shader.frag</file>
         <file>res/shaders/post_processor.vert</file>
@@ -9,7 +9,7 @@
         <file>res/shaders/sprite.vert</file>
         <file>res/shaders/particle.frag</file>
         <file>res/shaders/particle.vert</file>
-		<file>res/images/wall.png</file>
+        <file>res/images/wall.png</file>
         <file>res/images/block.png</file>
         <file>res/images/block_solid.png</file>
         <file>res/images/awesomeface.png</file>
@@ -21,5 +21,9 @@
         <file>res/images/powerup_passthrough.png</file>
         <file>res/images/powerup_speed.png</file>
         <file>res/images/powerup_sticky.png</file>
+        <file>res/audio/bleep.mp3</file>
+        <file>res/audio/bleep.wav</file>
+        <file>res/audio/breakout.mp3</file>
+        <file>res/audio/solid.wav</file>
     </qresource>
 </RCC>
