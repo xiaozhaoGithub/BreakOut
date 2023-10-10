@@ -168,8 +168,8 @@ void GameGlWidget::UpdateGame()
     float offset = sphere_->Radius() / 2.0f;
     particle_generator_->Update(dt, 2, sphere_.get(), QVector2D(offset, offset));
 
-    powerup_manager_->Update(dt, std::bind(&GameGlWidget::OnDeactivatePowerUp, this,
-                                           std::placeholders::_1));
+    powerup_manager_->Update(dt, width(), height(),
+                             std::bind(&GameGlWidget::OnDeactivatePowerUp, this, std::placeholders::_1));
 
     post_processor_->Update(dt);
 
