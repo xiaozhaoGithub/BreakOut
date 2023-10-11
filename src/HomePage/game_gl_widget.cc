@@ -162,7 +162,7 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
 void GameGlWidget::InitBgMusic()
 {
     auto media_player = new QMediaPlayer(this);
-    media_player->setMedia(QUrl::fromLocalFile(":/res/audio/breakout.mp3"));
+    media_player->setMedia(QUrl("qrc:/res/audio/breakout.mp3"));
     media_player->setVolume(50);
     media_player->play();
 }
