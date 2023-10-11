@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 
+#include "audio_manager.h"
 #include "collision_helper.h"
 
 GameLevel::GameLevel(int w, int h)
@@ -84,8 +85,11 @@ void GameLevel::DoCollision(SphereObject* object, std::function<void(const QVect
 
             if (brick.IsSolid()) {
                 post_processor_->SetShake(true);
+                Singleton<AudioManager>::Instance()->Play(":/res/audio/solid.wav");
             } else {
                 brick.Destroy();
+                Singleton<AudioManager>::Instance()->Play(":/res/audio/bleep.wav");
+
                 cb(brick.Pos());
             }
         }

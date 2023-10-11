@@ -1,6 +1,7 @@
 #include "game_gl_widget.h"
 
 #include <QDateTime>
+#include <QMediaPlayer>
 #include <QOpenGLTexture>
 
 #include "audio_manager.h"
@@ -20,7 +21,7 @@ GameGlWidget::GameGlWidget(QWidget* parent)
 {
     setFocusPolicy(Qt::StrongFocus);
 
-    InitAudioManager();
+    InitBgMusic();
 }
 
 GameGlWidget::~GameGlWidget()
@@ -155,9 +156,12 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
     update();
 }
 
-void GameGlWidget::InitAudioManager()
+void GameGlWidget::InitBgMusic()
 {
-    Singleton<AudioManager>::Instance()->Play(":/res/audio/breakout.mp3");
+    auto media_player = new QMediaPlayer(this);
+    media_player->setMedia(QUrl::fromLocalFile(":/res/audio/breakout.mp3"));
+    media_player->setVolume(50);
+    media_player->play();
 }
 
 void GameGlWidget::UpdateGame()
@@ -210,6 +214,8 @@ void GameGlWidget::DoCollision()
             velocity = velocity.normalized() * old_velocity.length();
             sphere_->SetVelocity(velocity);
             sphere_->SetStuck(sphere_->IsSticky());
+
+            Singleton<AudioManager>::Instance()->Play(":/res/audio/bleep_player.wav");
         }
     }
 
@@ -246,6 +252,8 @@ void GameGlWidget::CheckSpherePos()
 
 void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)
 {
+    Singleton<AudioManager>::Instance()->Play(":/res/audio/powerup.wav");
+
     switch (type) {
     case PowerUp::T_SPEED:
         sphere_->SetVelocity(sphere_->Velocity() * 1.2f);

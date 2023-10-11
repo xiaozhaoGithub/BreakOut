@@ -21,9 +21,10 @@
         <file>res/images/powerup_passthrough.png</file>
         <file>res/images/powerup_speed.png</file>
         <file>res/images/powerup_sticky.png</file>
-        <file>res/audio/bleep.mp3</file>
-        <file>res/audio/bleep.wav</file>
         <file>res/audio/breakout.mp3</file>
+        <file>res/audio/bleep.wav</file>
+        <file>res/audio/bleep_player.wav</file>
         <file>res/audio/solid.wav</file>
+        <file>res/audio/powerup.wav</file>
     </qresource>
 </RCC>

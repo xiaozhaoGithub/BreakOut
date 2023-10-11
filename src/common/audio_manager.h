@@ -12,7 +12,7 @@ public:
     AudioManager();
     ~AudioManager() = default;
 
-    void Play(const char* file);
+    void Play(const char* file, int loop_count = QSoundEffect::Infinite);
     void Stop();
 
 private:
