@@ -20,9 +20,9 @@ void GameLevel::SetViewport(int w, int h)
     h_ = h;
 }
 
-void GameLevel::Load()
+void GameLevel::Load(const char* filename)
 {
-    auto level_datas = ReadLayersFromFile("res/levels/one.lvl");
+    auto level_datas = ReadLayersFromFile(filename);
     BuildBricks(std::move(level_datas));
 }
 
@@ -99,6 +99,11 @@ void GameLevel::DoCollision(SphereObject* object, std::function<void(const QVect
 void GameLevel::SetPostProcessor(std::shared_ptr<PostProcessor> post_processor)
 {
     post_processor_ = post_processor;
+}
+
+void GameLevel::NextLevel()
+{
+    level_ = level_ % level_num_;
 }
 
 std::vector<std::vector<int>> GameLevel::ReadLayersFromFile(const char* file)

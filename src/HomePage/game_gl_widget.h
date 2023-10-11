@@ -9,6 +9,7 @@
 
 #include "game_level.h"
 #include "game_object.h"
+#include "game_state.h"
 #include "particle_generator.h"
 #include "sprite_renderer.h"
 
@@ -42,6 +43,8 @@ private:
     QTimer* render_timer_;
     qint64 last_frame_time_ = 0;
     qint64 current_frame_time_;
+
+    std::unique_ptr<GameState> game_state_;
 
     std::unique_ptr<GameLevel> game_level_;
     std::unique_ptr<GameObject> player_;

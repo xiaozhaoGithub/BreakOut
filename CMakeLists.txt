@@ -47,6 +47,7 @@ set(Headers
 	src/HomePage/post_processor.h
 	src/HomePage/power_up.h
 	src/HomePage/power_up_manager.h
+	src/HomePage/game_state.h
 	src/common/singleton.h
 	src/common/resource_manager.h
 	src/common/audio_manager.h
@@ -66,6 +67,7 @@ set(Sources
 	src/HomePage/post_processor.cc
 	src/HomePage/power_up.cc
 	src/HomePage/power_up_manager.cc
+	src/HomePage/game_state.cc
 	src/common/resource_manager.cc
 	src/common/audio_manager.cc
 )

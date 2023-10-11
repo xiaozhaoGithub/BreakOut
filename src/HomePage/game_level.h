@@ -12,11 +12,16 @@ public:
     ~GameLevel();
 
     void SetViewport(int w, int h);
-    void Load();
+    void Load(const char* filename);
     void Draw(std::shared_ptr<SpriteRenderer> renderer);
     void DoCollision(SphereObject* object, std::function<void(const QVector2D& pos)> cb);
 
     void SetPostProcessor(std::shared_ptr<PostProcessor> post_processor);
+
+    inline void SetLevelNum(int num);
+    inline int Level();
+
+    void NextLevel();
 
 private:
     enum TileValue
@@ -36,8 +41,24 @@ private:
 private:
     int w_;
     int h_;
+
+    int level_num_;
+    int level_;
+
     std::list<GameObject> bricks_;
 
     std::shared_ptr<PostProcessor> post_processor_;
 };
+
+
+inline void GameLevel::SetLevelNum(int num)
+{
+    level_num_ = num;
+}
+
+inline int GameLevel::Level()
+{
+    return level_;
+}
+
 #endif

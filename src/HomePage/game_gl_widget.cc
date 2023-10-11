@@ -16,10 +16,13 @@ constexpr QVector2D kPlayerSize(100.0f, 20.0f);
 
 GameGlWidget::GameGlWidget(QWidget* parent)
     : QOpenGLWidget(parent)
+    , game_state_(std::make_unique<GameState>())
     , game_level_(std::make_unique<GameLevel>(width(), height()))
     , powerup_manager_(std::make_shared<PowerUpManager>())
 {
     setFocusPolicy(Qt::StrongFocus);
+    game_state_->SetLife(5);
+    game_level_->SetLevelNum(4);
 
     InitBgMusic();
 }
@@ -43,7 +46,7 @@ void GameGlWidget::initializeGL()
     shader_program->link();
 
     sprite_renderer_ = std::make_shared<SpriteRenderer>(shader_program);
-    bg_tex_ = res_manager->Texture("wall", ":/res/images/wall.png", false);
+    bg_tex_ = res_manager->Texture("background", ":/res/images/background.jpg", false);
     paddle_tex_ = res_manager->Texture("paddle", ":/res/images/paddle.png", false);
     sphere_tex_ = res_manager->Texture("awesomeface", ":/res/images/awesomeface.png", false);
     sphere_tex_->setWrapMode(QOpenGLTexture::ClampToEdge);
@@ -90,7 +93,7 @@ void GameGlWidget::resizeGL(int w, int h)
     sprite_renderer_->SetSize(QVector2D(w, h));
 
     game_level_->SetViewport(w, h);
-    game_level_->Load();
+    game_level_->Load("res/levels/one.lvl");
 
     player_->SetPos(QVector2D(((float)w - kPlayerSize.x()) / 2, (float)h - kPlayerSize.y()));
     sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
@@ -109,7 +112,7 @@ void GameGlWidget::paintGL()
     post_processor_->BeginProcessor();
 
     sprite_renderer_->Draw(bg_tex_, QVector2D(0.0f, 0.0f), QVector2D(width(), height()), 0.0f,
-                           QVector3D(0.0f, 0.0f, 0.0f));
+                           QVector3D(1.0f, 1.0f, 1.0f));
 
     game_level_->Draw(sprite_renderer_);
     player_->Draw(sprite_renderer_);
@@ -247,6 +250,8 @@ void GameGlWidget::CheckSpherePos()
 
         sphere_->Reset(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                  (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
+
+        game_state_->SetLife(game_state_->Life() - 1);
     }
 }
 
