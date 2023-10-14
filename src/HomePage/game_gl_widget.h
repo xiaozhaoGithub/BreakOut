@@ -12,6 +12,7 @@
 #include "game_state.h"
 #include "particle_generator.h"
 #include "sprite_renderer.h"
+#include "text_renderer.h"
 
 class GameGlWidget : public QOpenGLWidget, public QOpenGLFunctions_3_3_Core
 {
@@ -45,6 +46,7 @@ private:
     qint64 current_frame_time_;
 
     std::unique_ptr<GameState> game_state_;
+    std::unique_ptr<TextRenderer> text_renderer_;
 
     std::unique_ptr<GameLevel> game_level_;
     std::unique_ptr<GameObject> player_;

@@ -7,24 +7,24 @@ public:
     GameState();
     ~GameState() {}
 
-    inline void SetLife(int life);
-    inline int Life();
+    inline void SetLives(int lives);
+    inline int Lives();
 
 private:
-    int life_;
+    int lives_;
 };
 
-inline void GameState::SetLife(int life)
+inline void GameState::SetLives(int lives)
 {
-    if (life < 0)
+    if (lives < 0)
         return;
 
-    life_ = life;
+    lives_ = lives;
 }
 
-inline int GameState::Life()
+inline int GameState::Lives()
 {
-    return life_;
+    return lives_;
 }
 
 #endif

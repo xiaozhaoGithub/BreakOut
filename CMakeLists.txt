@@ -51,6 +51,8 @@ set(Headers
 	src/common/singleton.h
 	src/common/resource_manager.h
 	src/common/audio_manager.h
+	src/common/text_renderer.h
+	src/common/shader.h
 )
 #source_group("Headers" FILES ${Headers})
 
@@ -70,6 +72,8 @@ set(Sources
 	src/HomePage/game_state.cc
 	src/common/resource_manager.cc
 	src/common/audio_manager.cc
+	src/common/text_renderer.cc
+	src/common/shader.cc
 )
 #source_group("Sources" FILES ${Sources})
 
@@ -86,6 +90,8 @@ target_include_directories(${PROJECT_NAME}
 PRIVATE
 	src/HomePage
 	src/common
+	3rdparty/freetype/include
+	3rdparty/glm
 )
 
 ################################################################################
@@ -95,8 +101,17 @@ target_link_libraries(${PROJECT_NAME}
 PRIVATE 
 	Qt${QT_VERSION_MAJOR}::Widgets
 	Qt${QT_VERSION_MAJOR}::Multimedia
+	freetyped
 )
 
+target_link_directories(${PROJECT_NAME} 
+PRIVATE
+	3rdparty/freetype/lib
+)
+
+################################################################################
+# Set target properties
+################################################################################
 set_target_properties(${PROJECT_NAME}
 PROPERTIES
 	VS_PLATFORM_TOOLSET v141

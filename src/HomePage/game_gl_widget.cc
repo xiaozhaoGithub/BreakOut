@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QMediaPlayer>
 #include <QOpenGLTexture>
+#include <sstream>
 
 #include "audio_manager.h"
 #include "collision_helper.h"
@@ -21,7 +22,7 @@ GameGlWidget::GameGlWidget(QWidget* parent)
     , powerup_manager_(std::make_shared<PowerUpManager>())
 {
     setFocusPolicy(Qt::StrongFocus);
-    game_state_->SetLife(5);
+    game_state_->SetLives(3);
     game_level_->SetLevelNum(4);
 
     InitBgMusic();
@@ -79,6 +80,10 @@ void GameGlWidget::initializeGL()
     post_processor_ = std::make_shared<PostProcessor>(post_shader, post_fbo);
     game_level_->SetPostProcessor(post_processor_);
 
+    // texts
+    text_renderer_ = std::make_unique<TextRenderer>();
+    text_renderer_->Load("res/fonts/arial.ttf", 48);
+
     // scheduled updates
     render_timer_ = new QTimer(this);
     render_timer_->setInterval(10);
@@ -104,6 +109,8 @@ void GameGlWidget::resizeGL(int w, int h)
     particle_shader_->bind();
     particle_shader_->setUniformValue("proj_mat", proj_mat);
 
+    text_renderer_->Resize(w, h);
+
     post_processor_->SetFbo(std::make_shared<QOpenGLFramebufferObject>(w, h));
 }
 
@@ -119,6 +126,13 @@ void GameGlWidget::paintGL()
     particle_generator_->Draw();
     sphere_->Draw(sprite_renderer_);
     powerup_manager_->Draw(sprite_renderer_);
+
+    std::stringstream ss;
+    ss << game_state_->Lives();
+    float scale = 0.5f;
+    int offset = 48 * scale;
+    text_renderer_->RenderText("Lives:" + ss.str(), 0.0f, height() - offset, scale,
+                               glm::vec3(5.0f, 5.0f, 1.0f));
 
     post_processor_->EndProcessor();
     post_processor_->Draw();
@@ -251,7 +265,7 @@ void GameGlWidget::CheckSpherePos()
         sphere_->Reset(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                  (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
 
-        game_state_->SetLife(game_state_->Life() - 1);
+        game_state_->SetLives(game_state_->Lives() - 1);
     }
 }
 
