@@ -33,10 +33,17 @@ private:
     void InitBgMusic();
     void UpdateGame();
     void DoCollision();
-    void HandlePlayerMove(const QVector2D& pos);
     void CheckSpherePos();
+    void ResetState(GameState::StateFlag state);
 
-    // callback
+    // key events
+    void HandleLevelMove(int key);
+    void HandlePlayerMove(const QVector2D& pos);
+    void HandleEnterInput();
+    void HandleSpaceInput();
+    void HandleEscInput();
+
+    // callbacks
     void OnActivatePowerUp(PowerUp::Type type);
     void OnDeactivatePowerUp(PowerUp::Type type);
 
@@ -46,7 +53,7 @@ private:
     qint64 current_frame_time_;
 
     std::unique_ptr<GameState> game_state_;
-    std::unique_ptr<TextRenderer> text_renderer_;
+    std::shared_ptr<TextRenderer> text_renderer_;
 
     std::unique_ptr<GameLevel> game_level_;
     std::unique_ptr<GameObject> player_;

@@ -31,6 +31,7 @@ void TextRenderer::Load(const char* font_file, GLuint font_size)
 
     // 宽度值设为0, 从字体面通过给定的高度中动态计算出字形的宽度
     FT_Set_Pixel_Sizes(face, 0, font_size);
+    font_height_ = font_size;
 
     // OpenGL要求所有的纹理都是4字节对齐的，即纹理的大小永远是4字节的倍数。通常这并不会出现什么问题，因为大部分纹理的宽度都为4的倍数或
     // 每像素使用4个字节，但是现在我们每个像素只用了一个字节，它可以是任意的宽度。通过将纹理解压对齐参数设为1，这样才能确保不会有对齐问题
@@ -90,13 +91,23 @@ void TextRenderer::InitRenderData()
 
 void TextRenderer::Resize(GLint w, GLint h)
 {
-    viewport_.x = static_cast<GLfloat>(w);
-    viewport_.y = static_cast<GLfloat>(h);
+    window_size_.x = static_cast<GLfloat>(w);
+    window_size_.y = static_cast<GLfloat>(h);
 }
 
-void TextRenderer::SetOriginBottom(bool state)
+
+float TextRenderer::TextWidth(const std::string& text, GLfloat scale)
 {
-    is_origin_bottom_ = state;
+    float width = 0.0f;
+
+    for (auto c = text.begin(); c != text.end(); c++) {
+        Character ch = characters_[*c];
+        GLfloat w = ch.size.x * scale;
+
+        width += (ch.advance >> 6) * scale; // 位偏移6个单位来获取单位为像素的值 (2^6 = 64)
+    }
+
+    return width;
 }
 
 void TextRenderer::RenderText(const std::string& text, GLfloat x, GLfloat y, GLfloat scale,
@@ -104,7 +115,7 @@ void TextRenderer::RenderText(const std::string& text, GLfloat x, GLfloat y, GLf
 {
     shader_->bind();
     // use floats to make ortho mat.
-    shader_->setMatrix("projectionMat", glm::ortho(0.0f, viewport_.x, 0.0f, viewport_.y));
+    shader_->setMatrix("projectionMat", glm::ortho(0.0f, window_size_.x, 0.0f, window_size_.y));
     shader_->setVec("textColor", color);
 
     glBindVertexArray(vao_);

@@ -10,20 +10,37 @@
 GameLevel::GameLevel(int w, int h)
     : w_(w)
     , h_(h)
+    , level_(0)
 {}
 
 GameLevel::~GameLevel() {}
 
-void GameLevel::SetViewport(int w, int h)
+void GameLevel::Resize(int w, int h)
 {
     w_ = w;
     h_ = h;
+
+    if (level_datas_.empty()) {
+        Load(0);
+        BuildBricks(level_datas_);
+    } else {
+        BuildBricks(level_datas_); // TODO Only the size and position are refreshed.
+    }
 }
 
 void GameLevel::Load(const char* filename)
 {
-    auto level_datas = ReadLayersFromFile(filename);
-    BuildBricks(std::move(level_datas));
+    level_datas_ = ReadLayersFromFile(filename);
+    BuildBricks(level_datas_);
+}
+
+void GameLevel::Load(int level)
+{
+    std::stringstream level_str;
+    level_str << (level + 1);
+
+    std::string file = "res/levels/level_" + level_str.str() + ".lvl";
+    Load(file.c_str());
 }
 
 void GameLevel::Draw(std::shared_ptr<SpriteRenderer> renderer)
@@ -101,9 +118,18 @@ void GameLevel::SetPostProcessor(std::shared_ptr<PostProcessor> post_processor)
     post_processor_ = post_processor;
 }
 
+void GameLevel::PreviousLevel()
+{
+    if (--level_ < 0) {
+        level_ = level_num_ - 1;
+    }
+    Load(level_);
+}
+
 void GameLevel::NextLevel()
 {
-    level_ = level_ % level_num_;
+    level_ = ++level_ % level_num_;
+    Load(level_);
 }
 
 std::vector<std::vector<int>> GameLevel::ReadLayersFromFile(const char* file)
@@ -127,7 +153,7 @@ std::vector<std::vector<int>> GameLevel::ReadLayersFromFile(const char* file)
     return level_datas;
 }
 
-void GameLevel::BuildBricks(std::vector<std::vector<int>>&& level_datas)
+void GameLevel::BuildBricks(const std::vector<std::vector<int>>& level_datas)
 {
     bricks_.clear();
 

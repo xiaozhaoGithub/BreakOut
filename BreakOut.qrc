@@ -1,9 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/levels/one.lvl</file>
-        <file>res/levels/two.lvl</file>
-        <file>res/levels/three.lvl</file>
-        <file>res/levels/four.lvl</file>
+        <file>res/levels/level_1.lvl</file>
+        <file>res/levels/level_2.lvl</file>
+        <file>res/levels/level_3.lvl</file>
+        <file>res/levels/level_4.lvl</file>
         <file>res/shaders/shader.vert</file>
         <file>res/shaders/shader.frag</file>
         <file>res/shaders/post_processor.vert</file>

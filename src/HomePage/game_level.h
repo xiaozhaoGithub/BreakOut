@@ -11,16 +11,20 @@ public:
     GameLevel(int w, int h);
     ~GameLevel();
 
-    void SetViewport(int w, int h);
+    void Resize(int w, int h);
     void Load(const char* filename);
+    void Load(int level);
+
     void Draw(std::shared_ptr<SpriteRenderer> renderer);
     void DoCollision(SphereObject* object, std::function<void(const QVector2D& pos)> cb);
-
     void SetPostProcessor(std::shared_ptr<PostProcessor> post_processor);
 
     inline void SetLevelNum(int num);
     inline int Level();
 
+    bool IsCompleted();
+
+    void PreviousLevel();
     void NextLevel();
 
 private:
@@ -36,7 +40,7 @@ private:
     };
 
     std::vector<std::vector<int>> ReadLayersFromFile(const char* file);
-    void BuildBricks(std::vector<std::vector<int>>&& level_datas);
+    void BuildBricks(const std::vector<std::vector<int>>& level_datas);
 
 private:
     int w_;
@@ -45,6 +49,7 @@ private:
     int level_num_;
     int level_;
 
+    std::vector<std::vector<int>> level_datas_;
     std::list<GameObject> bricks_;
 
     std::shared_ptr<PostProcessor> post_processor_;
@@ -59,6 +64,17 @@ inline void GameLevel::SetLevelNum(int num)
 inline int GameLevel::Level()
 {
     return level_;
+}
+
+inline bool GameLevel::IsCompleted()
+{
+    for (auto& brick : bricks_) {
+        if (!brick.IsSolid() && !brick.IsDestroyed()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 #endif

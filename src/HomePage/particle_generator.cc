@@ -72,6 +72,14 @@ void ParticleGenerator::Draw()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // blend default
 }
 
+void ParticleGenerator::Resize(int w, int h)
+{
+    QMatrix4x4 proj_mat;
+    proj_mat.ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
+    shader_->bind();
+    shader_->setUniformValue("proj_mat", proj_mat);
+}
+
 void ParticleGenerator::InitRenderData()
 {
     initializeOpenGLFunctions();

@@ -22,15 +22,20 @@ public:
 
     void Load(const char* font_file, GLuint font_size);
     void Resize(GLint w, GLint h);
-    void SetOriginBottom(bool state);
 
     void RenderText(const std::string& text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+    float TextWidth(const std::string& text, GLfloat scale);
+
+    inline void SetOriginBottom(bool state);
+
+    inline GLuint FontHeight();
+    inline glm::vec2 WindowSize();
 
 private:
     void InitRenderData();
 
 private:
-    glm::vec2 viewport_;
+    glm::vec2 window_size_;
     std::map<char, Character> characters_;
 
     std::unique_ptr<AbstractShader> shader_;
@@ -38,6 +43,22 @@ private:
     GLuint vbo_;
 
     bool is_origin_bottom_;
+    GLuint font_height_;
 };
+
+inline void TextRenderer::SetOriginBottom(bool state)
+{
+    is_origin_bottom_ = state;
+}
+
+inline GLuint TextRenderer::FontHeight()
+{
+    return font_height_;
+}
+
+inline glm::vec2 TextRenderer::WindowSize()
+{
+    return window_size_;
+}
 
 #endif

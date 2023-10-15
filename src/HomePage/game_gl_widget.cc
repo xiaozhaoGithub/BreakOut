@@ -1,9 +1,9 @@
 #include "game_gl_widget.h"
 
+#include <QApplication>
 #include <QDateTime>
 #include <QMediaPlayer>
 #include <QOpenGLTexture>
-#include <sstream>
 
 #include "audio_manager.h"
 #include "collision_helper.h"
@@ -82,7 +82,7 @@ void GameGlWidget::initializeGL()
 
     // texts
     text_renderer_ = std::make_unique<TextRenderer>();
-    text_renderer_->Load("res/fonts/arial.ttf", 48);
+    text_renderer_->Load("res/fonts/arial.ttf", 24);
 
     // scheduled updates
     render_timer_ = new QTimer(this);
@@ -97,18 +97,13 @@ void GameGlWidget::resizeGL(int w, int h)
 
     sprite_renderer_->SetSize(QVector2D(w, h));
 
-    game_level_->SetViewport(w, h);
-    game_level_->Load("res/levels/one.lvl");
+    game_level_->Resize(w, h);
 
     player_->SetPos(QVector2D(((float)w - kPlayerSize.x()) / 2, (float)h - kPlayerSize.y()));
     sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                               (float)h - kPlayerSize.y() - 2 * sphere_->Radius()));
 
-    QMatrix4x4 proj_mat;
-    proj_mat.ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
-    particle_shader_->bind();
-    particle_shader_->setUniformValue("proj_mat", proj_mat);
-
+    particle_generator_->Resize(w, h);
     text_renderer_->Resize(w, h);
 
     post_processor_->SetFbo(std::make_shared<QOpenGLFramebufferObject>(w, h));
@@ -127,15 +122,10 @@ void GameGlWidget::paintGL()
     sphere_->Draw(sprite_renderer_);
     powerup_manager_->Draw(sprite_renderer_);
 
-    std::stringstream ss;
-    ss << game_state_->Lives();
-    float scale = 0.5f;
-    int offset = 48 * scale;
-    text_renderer_->RenderText("Lives:" + ss.str(), 0.0f, height() - offset, scale,
-                               glm::vec3(5.0f, 5.0f, 1.0f));
-
     post_processor_->EndProcessor();
     post_processor_->Draw();
+
+    game_state_->Draw(text_renderer_);
 }
 
 void GameGlWidget::keyPressEvent(QKeyEvent* event)
@@ -146,8 +136,12 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
     int key = event->key();
     switch (key) {
     case Qt::Key_Space: {
-        sphere_->SetStuck(false);
-        sphere_->SetSticky(false);
+        HandleSpaceInput();
+        break;
+    }
+    case Qt::Key_Up:
+    case Qt::Key_Down: {
+        HandleLevelMove(key);
         break;
     }
     case Qt::Key_Left: {
@@ -164,6 +158,15 @@ void GameGlWidget::keyPressEvent(QKeyEvent* event)
             x = width() - player_->Size().x();
         }
         HandlePlayerMove(QVector2D(x, pos.y()));
+        break;
+    }
+    case Qt::Key_Enter:
+    case Qt::Key_Return: {
+        HandleEnterInput();
+        break;
+    }
+    case Qt::Key_Escape: {
+        HandleEscInput();
         break;
     }
     default:
@@ -202,6 +205,10 @@ void GameGlWidget::UpdateGame()
                              std::bind(&GameGlWidget::OnDeactivatePowerUp, this, std::placeholders::_1));
 
     post_processor_->Update(dt);
+
+    if (game_level_->IsCompleted()) {
+        ResetState(GameState::SF_WIN);
+    }
 
     update();
 }
@@ -243,14 +250,55 @@ void GameGlWidget::DoCollision()
     CheckSpherePos();
 }
 
+void GameGlWidget::HandleLevelMove(int key)
+{
+    if (game_state_->State() != GameState::SF_MENU)
+        return;
+
+    if (key == Qt::Key_Up) {
+        game_level_->PreviousLevel();
+    } else {
+        game_level_->NextLevel();
+    }
+}
+
 void GameGlWidget::HandlePlayerMove(const QVector2D& pos)
 {
+    if (game_state_->State() == GameState::SF_MENU || game_state_->State() == GameState::SF_WIN)
+        return;
+
     player_->SetPos(pos);
 
     if (sphere_->IsStuck()) {
         sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
                                   (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
     }
+}
+
+void GameGlWidget::HandleEnterInput()
+{
+    if (game_state_->State() == GameState::SF_MENU) {
+        ResetState(GameState::SF_ACTIVE);
+    } else if (game_state_->State() == GameState::SF_WIN) {
+        ResetState(GameState::SF_MENU);
+    }
+}
+
+void GameGlWidget::HandleSpaceInput()
+{
+    if (game_state_->State() == GameState::SF_MENU || game_state_->State() == GameState::SF_WIN)
+        return;
+
+    sphere_->SetStuck(false);
+    sphere_->SetSticky(false);
+}
+
+void GameGlWidget::HandleEscInput()
+{
+    if (game_state_->State() != GameState::SF_WIN)
+        return;
+
+    qApp->quit();
 }
 
 void GameGlWidget::CheckSpherePos()
@@ -266,7 +314,49 @@ void GameGlWidget::CheckSpherePos()
                                  (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
 
         game_state_->SetLives(game_state_->Lives() - 1);
+        if (game_state_->Lives() == 0) {
+            ResetState(GameState::SF_MENU);
+        }
     }
+}
+
+void GameGlWidget::ResetState(GameState::StateFlag state)
+{
+    if (state == game_state_->State())
+        return;
+
+    game_state_->SetState(state);
+    game_state_->SetLives(3);
+    game_level_->Load(0);
+
+    post_processor_->SetShake(false);
+    post_processor_->SetConfuse(false);
+    powerup_manager_->Clear();
+
+    sphere_->SetVelocity(sphere_->DefaultVelocity());
+    sphere_->SetPassThrough(false);
+    sphere_->SetSticky(false);
+    sphere_->SetStuck(true);
+    player_->SetColor(QVector3D(1.0f, 1.0f, 1.0f));
+
+    switch (state) {
+    case GameState::SF_MENU: {
+        post_processor_->SetChaos(false);
+
+        player_->SetSize(kPlayerSize);
+        player_->SetPos(
+            QVector2D(((float)width() - kPlayerSize.x()) / 2, (float)height() - kPlayerSize.y()));
+
+    } break;
+    case GameState::SF_WIN: {
+        post_processor_->SetChaos(true);
+    } break;
+    default:
+        break;
+    }
+
+    sphere_->SetPos(QVector2D(player_->Pos().x() + (kPlayerSize.x() - 2 * sphere_->Radius()) / 2.0f,
+                              (float)height() - kPlayerSize.y() - 2 * sphere_->Radius()));
 }
 
 void GameGlWidget::OnActivatePowerUp(PowerUp::Type type)

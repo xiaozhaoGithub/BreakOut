@@ -24,6 +24,8 @@ public:
     void Update(float dt, int new_particle_num, GameObject* object, const QVector2D& offset);
     void Draw();
 
+    void Resize(int w, int h);
+
 private:
     void InitRenderData();
     int FirstUnusedParticleIndex();

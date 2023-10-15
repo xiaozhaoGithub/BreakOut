@@ -94,6 +94,11 @@ void PowerUpManager::DoCollision(GameObject* object, std::function<void(PowerUp:
     }
 }
 
+void PowerUpManager::Clear()
+{
+    powerup_map_.clear();
+}
+
 bool PowerUpManager::NeedSpawnPowerUp(int probability)
 {
     return rand() % probability == 0;
